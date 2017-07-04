@@ -1,0 +1,155 @@
+{% extends "index.html" %}
+
+{% load i18n admin_static %}
+
+{% block extend-style %}
+<style>
+#ace-editor {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    font-size: 16px;
+}
+</style>
+{% endblock extend-style %}
+
+{% block main-content %}
+
+
+
+<div class="row">
+        <div class="col-md-10 col-md-offset-1">
+            <div class="callout callout-default">
+                <h4>Instructions</h4>
+                <p>This question is currently in draft mode.</p>
+                <p>If you feel the problem description is inaccurate or found missing test cases, please 
+                <a href="#">go to Discuss</a> and post a new topic.</p>
+            </div>
+
+            <div class="tabbable">
+                <ul class="nav nav-tabs">
+                    <li class="active">
+                        <a href="#markdown-preview" data-toggle="tab">Description</a>
+                    </li>
+                    {# <li> #}
+                        {# <a href="#panel-558872" data-toggle="tab">Section 2</a> #}
+                    {# </li> #}
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane active" id="markdown-preview"></div>
+                    {# <div class="tab-pane" id="panel-558872"> #}
+                        {# <p> #}
+                            {# Howdy, I'm in Section 2. #}
+                        {# </p> #}
+                    {# </div> #}
+                </div>
+            </div>
+
+            <form id="id_answer" action="{% url "evaluate" %}" method="post" novalidate>{% csrf_token %}
+            <input type="text" name="quiz" value="{{ quiz.id }}" hidden="true">
+            <input type="text" name="contestant" value="{{ user.contestant.id }}" hidden="true">
+            <div class="row" style="margin: 20px 0 5px;">
+                
+                {{ snippet.language }}
+                {{ snippet.body }}
+                
+                <select class="selectpicker" id="themepicker" data-width="150px">
+                    <option>twilight</option>
+                    <option>solarized_light</option>
+                    <option>solarized_dark</option>
+                </select>
+
+                <input type="submit" name="submit" class="btn btn-danger pull-right" style="margin: 0 0 0 10px;" disabled="true"></input>
+                <input type="submit" name="evaluate" value="執行" class="btn btn-primary pull-right" {% if not user.is_authenticated %}disabled="true"
+                {% endif %}>
+            </div>
+            </form>
+            
+            <div type="text" name="body" type="text" name="body" id="ace-editor"></div>
+
+
+
+        </div>
+    </div>
+
+{% endblock main-content %}
+
+{% block extend-js %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/8.3.1/markdown-it.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.7/ace.js"></script>
+    <script type="text/javascript">
+        var md = window.markdownit();
+
+        var editor = ace.edit("ace-editor");
+        var themepicker = $("#themepicker");
+        var languagepicker = $("#id_language");
+        var body = $("#id_body");
+        var form = $("#id_answer");
+
+        themepicker.on("change", function(evt) {
+            editor.setTheme( "ace/theme/" + $(this).val());
+        });
+
+        languagepicker.on("change", function(evt) {
+            editor.session.setMode("ace/mode/" + $(this).val().replace(/\d|\./g, ''));
+        })
+
+        var qslug = "{{ quiz.slug|escapejs }}";
+        var data = localStorage[qslug + "-src"] || "# Write your answer blow.\n\n";
+        var theme = localStorage[qslug + "-theme"] || "twilight";
+        var language = localStorage[qslug + "-language"] || "python3.5";
+        themepicker.val(theme);
+        languagepicker.val(language);
+
+        editor.setTheme( "ace/theme/" + themepicker.val());
+        editor.session.setMode("ace/mode/" + languagepicker.val().replace(/\d|\./g, ''));
+        editor.$blockScrolling = Infinity;
+        editor.insert(data);
+
+        editor.getSession().on('change', function(e) {
+            data = editor.getValue();
+        });
+
+        form.submit(function(evt) {
+            var self = $(this);
+            var target = self.find("input[type=submit]:focus");
+            var action = '/' + target.attr('name') + '/';
+            var is_authenticated = "{{ user.is_authenticated|yesno:"true,false" }}" == 'true';
+            evt.preventDefault();
+            if (is_authenticated || true) {
+               body.val(editor.getValue());
+                _data = self.serialize();
+                $.ajax({
+                    url: action,
+                    method: self.attr('method'),
+                    data: _data,
+                    dataType: 'json',
+                    success: function(ret) {
+                        console.log("success");
+                        console.log(ret);
+                    },
+                    error: function(ret) {
+                        console.log("error");
+                        console.log(ret);
+                    },
+                }); 
+            } else {
+                console.log('Authentication failed.')
+                // TODO:
+                // Redirect to login/signup.
+            }
+            
+        });
+
+        $(window).unload(function() {
+            localStorage[qslug + "-src"] = data;
+            localStorage[qslug + "-theme"] = themepicker.val();
+            localStorage[qslug + "-language"] = languagepicker.val();
+        });
+
+        $("#markdown-preview").html(md.render("{{ description|escapejs }}"));
+
+
+    </script>
+{% endblock %}
+

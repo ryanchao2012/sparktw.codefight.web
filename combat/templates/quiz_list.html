@@ -1,0 +1,44 @@
+{% extends "index.html" %}
+
+{% block main-content %}
+
+{% if quizs %}
+	{% for q in quizs %}
+	<div class="row">
+		<div class="col-md-8 col-md-offset-2">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<div class="row">
+						
+						<div class="col-md-1">
+							<span class="label label-success label-as-badge">{{ q.difficulty }}</span>
+						</div>
+						<div class="col-md-10">
+							<h1 class="panel-title" style="margin-left: 10px;">
+								<a id="quiz" href="{% url "quiz" slug=q.slug %}">{{ q.title }}</a>
+							</h1>
+						</div>
+						{% if q.status == "draft" %}
+							<div class="col-md-1">
+								<span class="label label-default label-as-badge" style="margin-left: -10px;">draft</span>
+							</div>
+						{% endif %}
+					</div> 
+				</div>
+
+				{# <div class="panel-body"> #}
+					{# {{ q.description }} #}
+				{# </div> #}
+			</div>
+		</div>
+	</div>
+	{% endfor %}
+{% else %}
+	<h2>There is no challenges.</h2>
+{% endif %}
+{% endblock main-content %}
+
+
+{% block extend-js %}
+
+{% endblock %}

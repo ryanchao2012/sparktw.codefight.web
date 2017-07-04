@@ -1,0 +1,18 @@
+<form id="formLogin" action="{% url "login" %}?next={{ request.path }}" method="post">
+    {% csrf_token %}
+    <label>Login</label> 
+    {% if loginform.non_field_errors %}
+	    {% for err in loginform.non_field_errors %}
+	      <div style="color: red;">{{ err }}</div>
+	    {% endfor %}
+    {% endif %}
+    {% for field in loginform %}
+        {% for error in field.errors %}
+            <div class="errorlist">* {{ error }}</div>
+        {% endfor %}
+        {{ field }}<br>
+    {% endfor %}
+    <button class="btn btn-primary pull-right" type="submit" id="btnLogin">Login</button>
+</form>
+
+<a href="{% url "signup" %}">Forgot password?</a>
