@@ -67,6 +67,8 @@
             
             <div type="text" name="body" type="text" name="body" id="ace-editor"></div>
 
+	    <div id="result"></div>
+
 
 
         </div>
@@ -77,8 +79,32 @@
 {% block extend-js %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/8.3.1/markdown-it.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.7/ace.js"></script>
+    <script src="{% static "js/ws4redis.js" %}"></script>
     <script type="text/javascript">
         var md = window.markdownit();
+
+        var ws4redis = WS4Redis({
+            uri: '{{ WEBSOCKET_URI }}{{ quiz.slug }}?subscribe-user',
+            receive_message: receiveMessage,
+//            heartbeat_msg: '^v^'
+        });
+        var billboard = $('#result');
+//        $("#text_message").keydown(function(event) {
+//            if (event.keyCode === 13) {
+//                event.preventDefault();
+//                sendMessage();
+//            }
+//        });
+//        $('#send_message').click(sendMessage);
+        // send message to the server using Ajax
+        function sendMessage() {
+        }
+        // receive a message though the Websocket from the server
+        function receiveMessage(msg) {
+	    console.log(msg);
+            billboard.append('<br/>' + msg);
+//            billboard.scrollTop(billboard.scrollTop() + 25);
+        }
 
         var editor = ace.edit("ace-editor");
         var themepicker = $("#themepicker");
@@ -95,16 +121,16 @@
         })
 
         var qslug = "{{ quiz.slug|escapejs }}";
-        var data = localStorage[qslug + "-src"] || "# Write your answer blow.\n\n";
+//        var data = body.val(); // localStorage[qslug + "-src"] || "# Write your answer blow.\n\n";
         var theme = localStorage[qslug + "-theme"] || "twilight";
-        var language = localStorage[qslug + "-language"] || "python3.5";
+        var language = $("#id_language"); // localStorage[qslug + "-language"] || "python3.5";
         themepicker.val(theme);
-        languagepicker.val(language);
+        languagepicker.val(language.val());
 
         editor.setTheme( "ace/theme/" + themepicker.val());
         editor.session.setMode("ace/mode/" + languagepicker.val().replace(/\d|\./g, ''));
         editor.$blockScrolling = Infinity;
-        editor.insert(data);
+        editor.insert(body.val());
 
         editor.getSession().on('change', function(e) {
             data = editor.getValue();
@@ -115,6 +141,7 @@
             var target = self.find("input[type=submit]:focus");
             var action = '/' + target.attr('name') + '/';
             var is_authenticated = "{{ user.is_authenticated|yesno:"true,false" }}" == 'true';
+	    billboard.empty();
             evt.preventDefault();
             if (is_authenticated || true) {
                body.val(editor.getValue());
@@ -123,7 +150,7 @@
                     url: action,
                     method: self.attr('method'),
                     data: _data,
-                    dataType: 'json',
+                    dataType: 'text',
                     success: function(ret) {
                         console.log("success");
                         console.log(ret);
@@ -142,9 +169,9 @@
         });
 
         $(window).unload(function() {
-            localStorage[qslug + "-src"] = data;
+//            localStorage[qslug + "-src"] = data;
             localStorage[qslug + "-theme"] = themepicker.val();
-            localStorage[qslug + "-language"] = languagepicker.val();
+//            localStorage[qslug + "-language"] = languagepicker.val();
         });
 
         $("#markdown-preview").html(md.render("{{ description|escapejs }}"));

@@ -25,7 +25,7 @@ SECRET_KEY = 'imscpf9vcgz!z@e5j&w*z6krq%!!fl18kj)+zzg-o)_#&$p0-6'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['f615ffe5.ngrok.io', 'localhost', '127.0.0.1', '192.168.105.164']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 
 # Application definition
@@ -41,7 +41,16 @@ INSTALLED_APPS = [
     'poke_around',
     'combat',
     'auth',
+    'ws4redis'
 ]
+
+WEBSOCKET_URL = '/ws/'
+WS4REDIS_EXPIRE = 300
+WS4REDIS_PREFIX = 'dj'
+WSGI_APPLICATION = 'ws4redis.django_runserver.application'
+# WS4REDIS_HEARTBEAT = 'spark'
+# WSGI_APPLICATION = 'web.wsgi.application'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -66,12 +75,12 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'ws4redis.context_processors.default',
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'web.wsgi.application'
 
 
 # Database
@@ -125,3 +134,27 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static'
 MEDIA_ROOT = 'media'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '[%(asctime)s %(module)s.%(funcName)s.%(lineno)d] %(levelname)s: %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
