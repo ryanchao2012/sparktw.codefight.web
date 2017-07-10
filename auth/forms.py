@@ -1,9 +1,13 @@
+import logging
 from django.contrib.auth.models import User
 from django import forms
-from auth.models import RepeatUser
+from auth.models import RepeatUserName
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.utils.translation import ugettext_lazy as _
+
+
+logger = logging.getLogger('django')
 
 
 class DuplicateUserException(Exception):
@@ -21,8 +25,19 @@ class UserSignupForm(UserCreationForm):
             attrs={
                 'class': 'form-control',
                 'placeholder': 'Email',
-                'pattern': '[a-z,A-Z,0-9,_]+@[a-z,A-Z]+\.[a-z,A-Z]+',
+                'pattern': '[a-z,A-Z,0-9,_,\.]+@[a-z,A-Z]+\.[a-z,A-Z]+',
                 'data-valid-min': '8',
+            }
+        )
+    )
+
+    nickname = forms.CharField(
+        max_length=31,
+        required=True,
+        widget=forms.TextInput(
+            attrs={
+                'class': 'form-control',
+                'placeholder': 'nickname',
             }
         )
     )
@@ -66,7 +81,7 @@ class UserSignupForm(UserCreationForm):
         email = instance.email
         name = email[: email.find('@')]
         try:
-            repeat = RepeatUser.objects.get(name=name)
+            repeat = RepeatUserName.objects.get(name=name)
             name += '.{}'.format(repeat.count + 1)
             if name and User.objects.filter(username=name).exists():
                 raise DuplicateUserException
@@ -76,16 +91,20 @@ class UserSignupForm(UserCreationForm):
 
         except DuplicateUserException:
             raise('Duplicate Username, this should NEVER happened!')
-        except RepeatUser.DoesNotExist as err:
-            print('@@@@@', err)
-            RepeatUser(name=name).save()
+
+        except RepeatUserName.DoesNotExist as err:
+            logger.warning(err)
+            RepeatUserName(name=name).save()
         except Exception as err:
-            print(err)
-            RepeatUser(name=name).save()
+            logger.warning(err)
+            RepeatUserName(name=name).save()
 
         instance.username = name
         if commit:
             instance.save()
+            nickname = self.cleaned_data.get('nickname') or name
+            instance.contestant.nickname = nickname
+            instance.contestant.save()
 
         return instance
 
@@ -127,7 +146,6 @@ class UserLoginForm(forms.Form):
     def clean(self):
         email = self.cleaned_data.get('email')
         raw_password = self.cleaned_data.get('password')
-        # print(email, raw_password)
 
         if email and raw_password:
             try:
@@ -140,7 +158,7 @@ class UserLoginForm(forms.Form):
             except User.DoesNotExist:
                 raise forms.ValidationError(self.error_messages['invalid_login'])
             except Exception as err:
-                print(err)
+                logger.warning(err)
                 raise forms.ValidationError(self.error_messages['invalid_login'])
 
         return self.cleaned_data

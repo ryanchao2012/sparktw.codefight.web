@@ -4,12 +4,14 @@ from django.contrib.auth import (
     logout as auth_logout,
     authenticate
 )
+from django.views.generic import DetailView
 from django.http import HttpResponse
 from django.shortcuts import render, reverse, redirect
 from rest_framework.renderers import JSONRenderer
 from auth.forms import (
     UserSignupForm, UserLoginForm
 )
+from combat.models import Contestant
 # from django.contrib.auth.models import User
 
 
@@ -55,9 +57,8 @@ def login(request):
 def signup(request):
     if request.user.is_authenticated():
         return redirect(reverse('home'))
-
+    redirect_to = request.GET.get('next', '/')
     if request.method == "POST":
-        redirect_to = request.GET.get('next', '/')
         data = request.POST.copy()
         form = UserSignupForm(data)
 
@@ -72,4 +73,14 @@ def signup(request):
     else:
         form = UserSignupForm()
 
-    return render(request, 'signup.html', {'form': form})
+    return render(request, 'signup.html', {'form': form, 'next': redirect_to})
+
+
+class ProfileView(DetailView):
+    template_name = 'profile.html'
+    model = Contestant
+    context_object_name = 'contestant'
+
+    def get_context_data(self, **kwargs):
+        context = super(ProfileView, self).get_context_data(**kwargs)
+        return context

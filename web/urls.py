@@ -22,7 +22,9 @@ from auth import views as auth_views
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', auth_views.home, name='home'),
-    url(r'^challenges/$', combat_views.challenges, name='quiz_list'),
+    url(r'^challenges/$', combat_views.challenges, name='challenges'),
+    url(r'^leaderboard/$', combat_views.leaderboard, name='leaderboard'),
+    url(r'^profile/(?P<slug>[-\w]+)/$', auth_views.ProfileView.as_view(), name='profile'),
     url(r'^q/(?P<slug>[-\w]+)/$', combat_views.QuizView.as_view(), name='quiz'),
     url(r'^evaluate/$', combat_views.evaluate, name='evaluate'),
     url(r'^accounts/login/$', auth_views.login, name='login'),

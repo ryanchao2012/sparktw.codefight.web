@@ -25,7 +25,7 @@ SECRET_KEY = 'imscpf9vcgz!z@e5j&w*z6krq%!!fl18kj)+zzg-o)_#&$p0-6'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
 
 
 # Application definition
@@ -41,7 +41,18 @@ INSTALLED_APPS = [
     'poke_around',
     'combat',
     'auth',
-    'ws4redis'
+    'ws4redis',
+    'django_nose',
+]
+
+# Use nose to run all tests
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+# Tell nose to measure coverage on the 'foo' and 'bar' apps
+NOSE_ARGS = [
+    '--with-coverage',
+    # '--cover-html',
+    '--cover-package=combat,auth',
 ]
 
 WEBSOCKET_URL = '/ws/'
@@ -80,7 +91,6 @@ TEMPLATES = [
         },
     },
 ]
-
 
 
 # Database
@@ -140,7 +150,8 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'simple': {
-            'format': '[%(asctime)s %(module)s.%(funcName)s.%(lineno)d] %(levelname)s: %(message)s'
+            'format': '[%(asctime)s %(module)s.%(funcName)s.%(lineno)d] %(levelname)s: %(message)s',
+            'datefmt': '%d/%b/%Y %H:%M:%S'
         },
     },
     'handlers': {

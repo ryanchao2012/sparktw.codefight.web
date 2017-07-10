@@ -4,7 +4,7 @@
 
 {% block main-content %}
 <div>
-    <form class="form-sign" id="formSignup" action="{% url "signup" %}?next={{request.path}}" method="post">
+    <form class="form-sign" id="formSignup" action="{% url "signup" %}?next={{ next }}" method="post">
         {% csrf_token %}
         <h2>Sign up
         <input class="btn btn-primary pull-right" type="submit" id="btnSignup">

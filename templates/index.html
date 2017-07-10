@@ -38,12 +38,12 @@
                         <ul class="nav navbar-nav">
                             <li style="margin-right: 10px;">
                                 <p class="navbar-btn">
-                                    <a id="challenges" class="btn btn-default btn-small" href="{% url "quiz_list" %}">Challenges</a>
+                                    <a id="challenges" class="btn btn-default btn-small" href="{% url "challenges" %}">Challenges</a>
                                 </p>
                             </li>
                             <li style="margin-right: 10px;">
                                 <p class="navbar-btn">
-                                    <a class="btn btn-default btn-small" href="#">Leaderboard</a>
+                                    <a class="btn btn-default btn-small" href="{% url "leaderboard" %}">Leaderboard</a>
                                 </p>
                             </li>
                             {# <li style="margin-right: 10px;"> #}
@@ -58,7 +58,7 @@
                             {% if user.is_authenticated %}
                                 <li class="dropdown">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                                    <span class="glyphicon glyphicon-info-sign"></span>&emsp;&emsp;{{ user }}<strong class="caret"></strong></a>
+                                    <span class="glyphicon glyphicon-info-sign"></span>&emsp;&emsp;{{ user.contestant.nickname }}<strong class="caret"></strong></a>
                                     <ul class="dropdown-menu"  style="text-align: center; min-width: 50px;">
                                         <li>
                                             <a href="#"><span class="glyphicon glyphicon-user"></span>&emsp;Profile</a>

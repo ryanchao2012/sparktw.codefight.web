@@ -1,10 +1,10 @@
 from django.contrib import admin
-from auth.models import RepeatUser
+from auth.models import RepeatUserName
 # Register your models here.
 
 
-class RepeatUserAdmin(admin.ModelAdmin):
+class RepeatUserNameAdmin(admin.ModelAdmin):
     list_display = ('name', 'count')
 
 
-admin.site.register(RepeatUser, RepeatUserAdmin)
+admin.site.register(RepeatUserName, RepeatUserNameAdmin)

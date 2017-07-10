@@ -1,0 +1,40 @@
+{% extends "index.html" %}
+
+{% block main-content %}
+
+{% if contestants %}
+
+<div class="row">
+    <div class="col-md-4 col-md-offset-0">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                  <th>#Ranking</th>
+                  <th>Name</th>
+                  <th>Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cont in contestants %}
+                    <tr>
+                        <td scope="row">
+                            <span class="label {% if forloop.first %} label-danger {% else %} label-primary {% endif %} label-as-badge">{{ forloop.counter }}</span>
+                        </td>
+                        <td><a href="{% url "profile" slug=cont.slug %}">{{ cont.nickname }}</a></td>
+                        <td><span class="label label-success label-as-badge">{{ cont.sparko }}</span></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+ 
+{% else %}
+    <h2>There is no challenges.</h2>
+{% endif %}
+{% endblock main-content %}
+
+
+{% block extend-js %}
+
+{% endblock %}

@@ -18,7 +18,7 @@ class SnippetForm(forms.ModelForm):
         if 'scala' in instance.language:
             ext = 'scala'
         path = 'snippet/{0}/{1}/{2}.{3}'.format(
-            instance.contestant.user.username, instance.quiz.slug, 'answer', ext
+            instance.contestant.valid_name(), instance.quiz.valid_name(), instance.valid_name(), ext
         )
         default_storage.delete(path)
         instance.script = default_storage.save(path, ContentFile(instance.body))

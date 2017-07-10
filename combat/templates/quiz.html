@@ -44,11 +44,11 @@
                     {# </div> #}
                 </div>
             </div>
-
-            <form id="id_answer" action="{% url "evaluate" %}" method="post" novalidate>{% csrf_token %}
+            <div class="row" style="margin: 20px 0 5px;">
+            <form id="id_answer" method="post" action="{% url "evaluate" %}" novalidate>{% csrf_token %}
             <input type="text" name="quiz" value="{{ quiz.id }}" hidden="true">
             <input type="text" name="contestant" value="{{ user.contestant.id }}" hidden="true">
-            <div class="row" style="margin: 20px 0 5px;">
+            
                 
                 {{ snippet.language }}
                 {{ snippet.body }}
@@ -59,11 +59,17 @@
                     <option>solarized_dark</option>
                 </select>
 
-                <input type="submit" name="submit" class="btn btn-danger pull-right" style="margin: 0 0 0 10px;" disabled="true"></input>
-                <input type="submit" name="evaluate" value="執行" class="btn btn-primary pull-right" {% if not user.is_authenticated %}disabled="true"
-                {% endif %}>
-            </div>
+                {# <input type="submit" name="submit" class="btn btn-danger pull-right" style="margin: 0 0 0 10px;" disabled="true"></input> #}
+                {% if user.is_authenticated %}
+                    <input type="submit" name="evaluate" value="執行" class="btn btn-primary pull-right">
+                {% endif %}
+                
+            
             </form>
+            {% if not user.is_authenticated %}
+                <a href="{% url "signup" %}?next={{ request.path }}"><button class="btn btn-primary pull-right">執行</button></a>
+            {% endif %}
+            </div>
             
             <div type="text" name="body" type="text" name="body" id="ace-editor"></div>
 
@@ -89,12 +95,6 @@
 //            heartbeat_msg: '^v^'
         });
         var billboard = $('#result');
-//        $("#text_message").keydown(function(event) {
-//            if (event.keyCode === 13) {
-//                event.preventDefault();
-//                sendMessage();
-//            }
-//        });
 //        $('#send_message').click(sendMessage);
         // send message to the server using Ajax
         function sendMessage() {
@@ -121,16 +121,23 @@
         })
 
         var qslug = "{{ quiz.slug|escapejs }}";
-//        var data = body.val(); // localStorage[qslug + "-src"] || "# Write your answer blow.\n\n";
         var theme = localStorage[qslug + "-theme"] || "twilight";
-        var language = $("#id_language"); // localStorage[qslug + "-language"] || "python3.5";
+        var language = $("#id_language");
         themepicker.val(theme);
         languagepicker.val(language.val());
 
         editor.setTheme( "ace/theme/" + themepicker.val());
         editor.session.setMode("ace/mode/" + languagepicker.val().replace(/\d|\./g, ''));
         editor.$blockScrolling = Infinity;
-        editor.insert(body.val());
+        // console.log("{{ answer|escapejs }}");
+        var answer = JSON.parse("{{ answer|escapejs }}");
+
+        editor.setValue(answer[language.val()]);
+
+        language.on("change", function(evt) {
+            editor.setValue(answer[$(this).val()]);
+        });
+        
 
         editor.getSession().on('change', function(e) {
             data = editor.getValue();
@@ -141,14 +148,16 @@
             var target = self.find("input[type=submit]:focus");
             var action = '/' + target.attr('name') + '/';
             var is_authenticated = "{{ user.is_authenticated|yesno:"true,false" }}" == 'true';
-	    billboard.empty();
-            evt.preventDefault();
-            if (is_authenticated || true) {
-               body.val(editor.getValue());
+            billboard.empty();
+            answer[language.val()] = editor.getValue();
+
+            if (is_authenticated) {
+                evt.preventDefault();
+                body.val(editor.getValue());
                 _data = self.serialize();
                 $.ajax({
-                    url: action,
-                    method: self.attr('method'),
+                    url: "{% url 'evaluate' %}",
+                    method: 'post',
                     data: _data,
                     dataType: 'text',
                     success: function(ret) {
@@ -160,18 +169,17 @@
                         console.log(ret);
                     },
                 }); 
-            } else {
-                console.log('Authentication failed.')
-                // TODO:
-                // Redirect to login/signup.
-            }
-            
+            } 
+            // else {
+            //     var url = "{% url 'signup' %}";
+            //     var redirect = "{{ request.path|escapejs }}";
+            //     $.get(url + '?next=' + redirect);
+            // }
+         
         });
 
         $(window).unload(function() {
-//            localStorage[qslug + "-src"] = data;
             localStorage[qslug + "-theme"] = themepicker.val();
-//            localStorage[qslug + "-language"] = languagepicker.val();
         });
 
         $("#markdown-preview").html(md.render("{{ description|escapejs }}"));

@@ -17,7 +17,7 @@ class ExtendUserAdmin(UserAdmin):
 
 
 class ContestantAdmin(admin.ModelAdmin):
-    list_display = ('nick_name', )
+    list_display = ('nickname', )
 
 
 class QuizAdmin(admin.ModelAdmin):
