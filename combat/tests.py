@@ -1,5 +1,7 @@
+import os
+import shutil
 import logging
-from django.test import TestCase, Client
+from django.test import TestCase, Client, override_settings
 from combat.models import Quiz, Snippet
 from django.contrib.auth.models import User
 from django.shortcuts import reverse
@@ -21,7 +23,7 @@ class QuizTest(TestCase):
         quiz.delete()
         self.assertFalse(Quiz.objects.filter(title=self.title).exists())
 
-
+@override_settings(MEDIA_ROOT='mock_media')
 class SnippetTest(TestCase):
     signup_email = 'fake@gmail.com'
     signup_username = 'fake'
@@ -57,6 +59,13 @@ class SnippetTest(TestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
+
+    def tearDown(self):
+        if os.path.exists('mock_media'):
+            try:
+                shutil.rmtree('mock_media')
+            except Exception as err:
+                logger.error(err)
 
     def test_evaluate_without_login(self):
         client = Client()

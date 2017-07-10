@@ -25,6 +25,7 @@ class AuthTestCase(TestCase):
     signup_email = 'fake@gmail.com'
     signup_username = 'fake'
     signup_password = 'fake12345678'
+    signup_nickname = 'FakeMe'
 
     def setUp(self):
         user = User.objects.create(username=self.login_username, email=self.login_email)
@@ -84,6 +85,7 @@ class AuthTestCase(TestCase):
             reverse('signup'),
             {
                 'email': self.signup_email,
+                'nickname': self.signup_nickname,
                 'password1': self.signup_password,
                 'password2': self.signup_password,
             },
@@ -99,6 +101,7 @@ class AuthTestCase(TestCase):
             reverse('signup'),
             {
                 'email': self.signup_email,
+                'nickname': self.signup_nickname,
                 'password1': self.signup_password,
                 'password2': self.signup_password,
             },
