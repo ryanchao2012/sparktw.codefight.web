@@ -20,7 +20,7 @@ from auth import views as auth_views
 
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+    url(r'^yeee/', admin.site.urls),
     url(r'^$', auth_views.home, name='home'),
     url(r'^challenges/$', combat_views.challenges, name='challenges'),
     url(r'^leaderboard/$', combat_views.leaderboard, name='leaderboard'),

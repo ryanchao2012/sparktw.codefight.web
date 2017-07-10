@@ -20,12 +20,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'imscpf9vcgz!z@e5j&w*z6krq%!!fl18kj)+zzg-o)_#&$p0-6'
+SECRET_KEY = os.environ.get('SPARKTW_JD_SECRET_KEY', '1234567')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'sparktw.ml', 'www.sparktw.ml']
 
 
 # Application definition
@@ -55,12 +55,12 @@ NOSE_ARGS = [
     '--cover-package=combat,auth',
 ]
 
-WEBSOCKET_URL = '/ws/'
-WS4REDIS_EXPIRE = 300
-WS4REDIS_PREFIX = 'dj'
-WSGI_APPLICATION = 'ws4redis.django_runserver.application'
+# WEBSOCKET_URL = '/ws/'
+# WS4REDIS_EXPIRE = 300
+# WS4REDIS_PREFIX = 'dj'
+# WSGI_APPLICATION = 'ws4redis.django_runserver.application'
 # WS4REDIS_HEARTBEAT = 'spark'
-# WSGI_APPLICATION = 'web.wsgi.application'
+WSGI_APPLICATION = 'web.wsgi.application'
 
 
 MIDDLEWARE = [
@@ -73,7 +73,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'web.urls'
+ROOT_URLCONF = 'sparktw.urls'
 
 TEMPLATES = [
     {

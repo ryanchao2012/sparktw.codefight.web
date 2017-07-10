@@ -40,7 +40,7 @@ def challenges(request):
 
 
 def leaderboard(request):
-    contestants = Contestant.objects.filter(user__is_staff=False).filter(sparko__gt=0).order_by('-sparko')[:100]
+    contestants = Contestant.objects.filter(user__is_staff=False).filter(sparko__gte=0).order_by('-sparko')[:100]
     return render(request, 'ranking.html', {'contestants': contestants})
 
 

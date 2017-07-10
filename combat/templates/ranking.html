@@ -20,7 +20,7 @@
                         <td scope="row">
                             <span class="label {% if forloop.first %} label-danger {% else %} label-primary {% endif %} label-as-badge">{{ forloop.counter }}</span>
                         </td>
-                        <td><a href="{% url "profile" slug=cont.slug %}">{{ cont.nickname }}</a></td>
+                        <td><a href="#">{{ cont.nickname }}</a></td>
                         <td><span class="label label-success label-as-badge">{{ cont.sparko }}</span></td>
                     </tr>
                 {% endfor %}
@@ -30,7 +30,7 @@
 </div>
  
 {% else %}
-    <h2>There is no challenges.</h2>
+    <h2>There is no contestants.</h2>
 {% endif %}
 {% endblock main-content %}
 

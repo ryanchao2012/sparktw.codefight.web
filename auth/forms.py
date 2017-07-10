@@ -66,6 +66,7 @@ class UserSignupForm(UserCreationForm):
         )
     )
 
+    field_order = ['email', 'nickname', 'password1', 'password2']
     class Meta:
         model = User
         fields = ('email',)
