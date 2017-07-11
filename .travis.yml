@@ -3,15 +3,11 @@ python:
   - "2.7"
   - "3.5"
   - "3.6"
-  - "pypy"
-  - "pypy3"
 
 service:
   - redis-server
 
 env:
-  - DJANGO_VERSION=1.9
-  - DJANGO_VERSION=1.10
   - DJANGO_VERSION=1.11
 
 install:

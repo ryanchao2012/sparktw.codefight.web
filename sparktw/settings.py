@@ -60,7 +60,7 @@ NOSE_ARGS = [
 # WS4REDIS_PREFIX = 'dj'
 # WSGI_APPLICATION = 'ws4redis.django_runserver.application'
 # WS4REDIS_HEARTBEAT = 'spark'
-WSGI_APPLICATION = 'web.wsgi.application'
+WSGI_APPLICATION = 'sparktw.wsgi.application'
 
 
 MIDDLEWARE = [
