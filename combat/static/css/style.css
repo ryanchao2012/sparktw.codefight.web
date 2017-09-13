@@ -4,13 +4,17 @@
 	background-image: linear-gradient(90deg, #d41a1a, #FFFFFF);
 }*/
 
+html, body{
+	background-color: #eee8d5;
+}
+
 a.btn-default {
-	color: white;
+	color: #eee;
 	background-color: transparent;
 }
 
 a.btn-default:hover {
-	background-color: #dff0d8;
+	background-color: #fefaee;
 }
 
 a {
@@ -62,4 +66,33 @@ a {
 .errorlist {
     color: #FF5722;
     font-size: 10px;
+}
+
+.table-striped>tbody>tr:nth-of-type(odd) {
+	background-color: #ebe2c4;
+}
+
+.table-hover>tbody>tr:hover {
+	background-color: #e9d89d;
+}
+
+/*pre {
+	background-color: #e9d89d;
+}*/
+
+.btn-default {
+	background-color: #fefaee;
+}
+
+.nav>li>a:focus, .nav>li>a:hover {
+	background-color: #fefaee;
+}
+
+.nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover {
+	background-color: #eee8d5;
+}
+
+.console {
+	background-color: #333;
+	color: #eee;
 }

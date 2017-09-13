@@ -27,7 +27,7 @@ class QuizAdmin(admin.ModelAdmin):
 
 
 class SnippetAdmin(admin.ModelAdmin):
-    list_display = ('contestant', 'quiz', 'language', 'status')
+    list_display = ('contestant', 'quiz', 'language', 'status', 'last_run')
     # readonly_fields = ('script',)
 
 

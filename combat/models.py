@@ -146,6 +146,7 @@ class Snippet(models.Model):
         ('compile', 'compilation error'),
         ('runtime', 'runtime error'),
         ('memory', 'memory exceeded'),
+        ('running', 'running')
     )
 
     uid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)

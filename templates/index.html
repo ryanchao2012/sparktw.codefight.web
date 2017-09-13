@@ -11,11 +11,17 @@
 
     <meta name="description" content="FooSpark hackathon challenge">
     <meta name="author" content="SparkTW">
-    {# <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> #}
-    <link href="{% static "css/bootstrap.min.css" %}" rel="stylesheet" type="text/css">
+
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
     <link href="{% static "css/style.css" %}" rel="stylesheet" type="text/css">
     {# <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"> #}
+
+    {# <link href="http://thomasf.github.io/solarized-css/solarized-dark.min.css" rel="stylesheet"></link> #}
+
+
     {% block extend-style %}{% endblock extend-style %}
 </head>
 <body>
@@ -118,6 +124,7 @@
     </div>
 
     <script src="{% static "js/jquery.min.js" %}"></script>
+    
     <script src="{% static "js/bootstrap.min.js" %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
     {# // <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> #}

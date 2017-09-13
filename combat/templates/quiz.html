@@ -19,29 +19,27 @@
 
 <div class="row">
         <div class="col-md-10 col-md-offset-1">
-            <div class="callout callout-default">
-                <h4>Instructions</h4>
-                <p>This question is currently in draft mode.</p>
-                <p>If you feel the problem description is inaccurate or found missing test cases, please 
-                <a href="#">go to Discuss</a> and post a new topic.</p>
-            </div>
+            {# <div class="callout callout-default"> #}
+                {# <h4>Instructions</h4> #}
+                {# <p>This question is currently in draft mode.</p> #}
+                {# <p>If you feel the problem description is inaccurate or found missing test cases, please  #}
+                {# <a href="#">go to Discuss</a> and post a new topic.</p> #}
+            {# </div> #}
 
             <div class="tabbable">
                 <ul class="nav nav-tabs">
                     <li class="active">
                         <a href="#markdown-preview" data-toggle="tab">Description</a>
                     </li>
-                    {# <li> #}
-                        {# <a href="#panel-558872" data-toggle="tab">Section 2</a> #}
-                    {# </li> #}
+                    <li>
+                        <a href="#evaluate-console" data-toggle="tab">Console</a>
+                    </li>
                 </ul>
                 <div class="tab-content">
-                    <div class="tab-pane active" id="markdown-preview"></div>
-                    {# <div class="tab-pane" id="panel-558872"> #}
-                        {# <p> #}
-                            {# Howdy, I'm in Section 2. #}
-                        {# </p> #}
-                    {# </div> #}
+                    <div class="tab-pane active" id="markdown-preview" style="padding: 20px; background-color: #fefaee;"></div>
+                    <div class="tab-pane console" id="evaluate-console" style="height: 250px; padding: 20px;">
+                        {# Running console. #}
+                    </div>
                 </div>
             </div>
             <div class="row" style="margin: 20px 0 5px;">
@@ -49,7 +47,6 @@
             <input type="text" name="quiz" value="{{ quiz.id }}" hidden="true">
             <input type="text" name="contestant" value="{{ user.contestant.id }}" hidden="true">
             
-                
                 {{ snippet.language }}
                 {{ snippet.body }}
                 
@@ -61,14 +58,16 @@
 
                 {# <input type="submit" name="submit" class="btn btn-danger pull-right" style="margin: 0 0 0 10px;" disabled="true"></input> #}
                 {% if user.is_authenticated %}
-                    <input type="submit" name="evaluate" value="執行" class="btn btn-primary pull-right">
+                    <input type="submit" name="evaluate" value="執行" class="btn btn-primary pull-right" {% if running %} disabled {% endif %}>
+                {% else %}
+                    <a href="{% url "signup" %}?next={{ request.path }}"><button class="btn btn-primary pull-right">執行</button></a>
                 {% endif %}
                 
             
             </form>
-            {% if not user.is_authenticated %}
-                <a href="{% url "signup" %}?next={{ request.path }}"><button class="btn btn-primary pull-right">執行</button></a>
-            {% endif %}
+            {# {% if not user.is_authenticated %} #}
+                {# <a href="{% url "signup" %}?next={{ request.path }}"><button class="btn btn-primary pull-right">執行</button></a> #}
+            {# {% endif %} #}
             </div>
             
             <div type="text" name="body" type="text" name="body" id="ace-editor"></div>
@@ -89,11 +88,11 @@
     <script type="text/javascript">
         var md = window.markdownit();
 
-        var ws4redis = WS4Redis({
-            uri: '{{ WEBSOCKET_URI }}{{ quiz.slug }}?subscribe-user',
-            receive_message: receiveMessage,
-//            heartbeat_msg: '^v^'
-        });
+//         var ws4redis = WS4Redis({
+//             uri: '{{ WEBSOCKET_URI }}{{ quiz.slug }}?subscribe-user',
+//             receive_message: receiveMessage,
+// //            heartbeat_msg: '^v^'
+//         });
         var billboard = $('#result');
 //        $('#send_message').click(sendMessage);
         // send message to the server using Ajax
@@ -101,12 +100,14 @@
         }
         // receive a message though the Websocket from the server
         function receiveMessage(msg) {
-	    console.log(msg);
+	        console.log(msg);
             billboard.append('<br/>' + msg);
 //            billboard.scrollTop(billboard.scrollTop() + 25);
         }
 
         var editor = ace.edit("ace-editor");
+        var evaluate_console = $("#evaluate-console");
+        var markdown_preview = $("#markdown-preview");
         var themepicker = $("#themepicker");
         var languagepicker = $("#id_language");
         var body = $("#id_body");
@@ -131,8 +132,14 @@
         editor.$blockScrolling = Infinity;
         // console.log("{{ answer|escapejs }}");
         var answer = JSON.parse("{{ answer|escapejs }}");
+        var last_result = JSON.parse("{{ result|escapejs }}");
 
         editor.setValue(answer[language.val()]);
+        if ("{{ running|yesno:"true,false" }}" == 'true') {
+            evaluate_console.append('Running test cases ...');
+        } else {
+            evaluate_console.append(JSON.parse(last_result[language.val()]).response_message + '<br>');
+        }
 
         language.on("change", function(evt) {
             editor.setValue(answer[$(this).val()]);
@@ -151,6 +158,9 @@
             billboard.empty();
             answer[language.val()] = editor.getValue();
 
+            // Show console tab and wait for result messages.
+            $('.nav-tabs a[href="#evaluate-console"]').tab('show');
+
             if (is_authenticated) {
                 evt.preventDefault();
                 body.val(editor.getValue());
@@ -159,10 +169,14 @@
                     url: "{% url 'evaluate' %}",
                     method: 'post',
                     data: _data,
-                    dataType: 'text',
+                    dataType: 'json',
                     success: function(ret) {
                         console.log("success");
-                        console.log(ret);
+
+                        if(ret.run_result) {
+                            var run_result = JSON.parse(ret.run_result);
+                            evaluate_console.append(run_result.response_message + '<br>');
+                        }
                     },
                     error: function(ret) {
                         console.log("error");
@@ -182,8 +196,7 @@
             localStorage[qslug + "-theme"] = themepicker.val();
         });
 
-        $("#markdown-preview").html(md.render("{{ description|escapejs }}"));
-
+        markdown_preview.html(md.render("{{ description|escapejs }}"));
 
     </script>
 {% endblock %}

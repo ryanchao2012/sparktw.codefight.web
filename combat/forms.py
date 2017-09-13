@@ -22,7 +22,7 @@ class SnippetForm(forms.ModelForm):
         )
         default_storage.delete(path)
         instance.script = default_storage.save(path, ContentFile(instance.body))
-        instance.run_count += 1
+        # instance.run_count += 1
         if commit:
             instance.save()
 
