@@ -26,7 +26,7 @@ from combat.forms import SnippetForm, ClientSnippetForm
 
 logger = logging.getLogger('django')
 
-SPARK_SUBMIT = 'http://spark1.3du.me:3000/submit'  # curl -XPOST -d '{"user":"larry", "language":"python", "subject":"word_count", "solution":"ccc"}'  spark1.3du.me:3000/submit
+SPARK_SUBMIT = 'http://35.187.234.136:3000/submit'  # curl -XPOST -d '{"user":"larry", "language":"python", "subject":"word_count", "solution":"ccc"}'  spark1.3du.me:3000/submit
 SPARK_CREATE = 'http://spark1.3du.me:3000/create/user'  # curl -XPOST -d '{"user":"dd"}' spark1.3du.me:3000/create/user
 
 
@@ -80,16 +80,16 @@ def evaluate(request):
                 user_verbose=str(snippet.contestant)
             )
 
-            response = requests.post(SPARK_SUBMIT, json=data)
+            # response = requests.post(SPARK_SUBMIT, json=data)
 
-            if response.status_code == 200:
-                content = response.content.decode('utf-8')
-                result_from_spark = json.loads(content)
-                snippet.status = 'fail' if result_from_spark['response_code'] else 'pass'
-                snippet.run_result = content
+            # if response.status_code == 200:
+            #    content = response.content.decode('utf-8')
+            #    result_from_spark = json.loads(content)
+            #    snippet.status = 'fail' if result_from_spark['response_code'] else 'pass'
+            #    snippet.run_result = content
 
-                snippet.save()
-                ret['run_result'] = content
+            #    snippet.save()
+            #    ret['run_result'] = content
 
             # # dummy code:
 
@@ -149,11 +149,11 @@ class QuizView(DetailView):
                 try:
                     sn = snippet.get(language=lang)
                     answer[lang] = sn.body
-                    result[lang] = sn.run_result or ''
+                    result[lang] = sn.run_result or {}
                     running = sn.status == 'running'
 
                 except:
-                    result[lang] = ''
+                    result[lang] = {}
                     if bool(file):
                         answer[lang] = default_storage.open(file.path).read().decode('utf-8')
                     else:
@@ -167,6 +167,7 @@ class QuizView(DetailView):
 
         else:
             for lang, file in languages:
+                result[lang] = {}
                 if bool(file):
                     answer[lang] = default_storage.open(file.path).read().decode('utf-8')
                 else:

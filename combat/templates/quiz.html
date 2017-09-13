@@ -59,15 +59,13 @@
                 {# <input type="submit" name="submit" class="btn btn-danger pull-right" style="margin: 0 0 0 10px;" disabled="true"></input> #}
                 {% if user.is_authenticated %}
                     <input type="submit" name="evaluate" value="執行" class="btn btn-primary pull-right" {% if running %} disabled {% endif %}>
-                {% else %}
-                    <a href="{% url "signup" %}?next={{ request.path }}"><button class="btn btn-primary pull-right">執行</button></a>
                 {% endif %}
                 
             
             </form>
-            {# {% if not user.is_authenticated %} #}
-                {# <a href="{% url "signup" %}?next={{ request.path }}"><button class="btn btn-primary pull-right">執行</button></a> #}
-            {# {% endif %} #}
+            {% if not user.is_authenticated %}
+                <a href="{% url "signup" %}?next={{ request.path }}"><button class="btn btn-primary pull-right">執行</button></a>
+            {% endif %}
             </div>
             
             <div type="text" name="body" type="text" name="body" id="ace-editor"></div>
@@ -135,11 +133,14 @@
         var last_result = JSON.parse("{{ result|escapejs }}");
 
         editor.setValue(answer[language.val()]);
-        if ("{{ running|yesno:"true,false" }}" == 'true') {
-            evaluate_console.append('Running test cases ...');
-        } else {
-            evaluate_console.append(JSON.parse(last_result[language.val()]).response_message + '<br>');
-        }
+        if ("{{ user.is_authenticated|yesno:"true,false" }}" == 'true') {
+            if ("{{ running|yesno:"true,false" }}" == 'true') {
+                evaluate_console.append('Running test cases ...');
+            } else {
+		var run_result = last_result[language.val()];
+                // evaluate_console.append(JSON.parse(run_result).response_message + '<br>');
+            }
+	}
 
         language.on("change", function(evt) {
             editor.setValue(answer[$(this).val()]);
