@@ -19,7 +19,7 @@ from combat.utils import QuizData, SnippetData, MyDict
 
 logger = logging.getLogger('django')
 
-SPARK_SUBMIT = 'http://spark1.3du.me:3000/submit'  # curl -XPOST -d '{"user":"larry", "language":"python", "subject":"word_count", "solution":"ccc"}'  spark1.3du.me:3000/submit
+SPARK_SUBMIT = 'http://35.187.234.136:3000/submit'  # curl -XPOST -d '{"user":"larry", "language":"python", "subject":"word_count", "solution":"ccc"}'  spark1.3du.me:3000/submit
 SPARK_CREATE = 'http://spark1.3du.me:3000/create/user'  # curl -XPOST -d '{"user":"dd"}' spark1.3du.me:3000/create/user
 
 
