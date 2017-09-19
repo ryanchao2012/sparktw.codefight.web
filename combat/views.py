@@ -4,7 +4,7 @@ from django.core.files.storage import default_storage
 from django.conf import settings as django_settings
 from django.shortcuts import render
 from django.forms.models import model_to_dict
-
+import requests
 from django.http import HttpResponse
 from django.views.generic import DetailView
 from django.core.serializers.json import DjangoJSONEncoder
@@ -46,6 +46,7 @@ class QuizView(DetailView):
     template_name = 'quiz.html'
     model = Quiz
     context_object_name = 'quiz'
+    create_user_url = 'http://35.198.254.175:3000/create/user'
 
     def get_context_data(self, **kwargs):
         context = super(QuizView, self).get_context_data(**kwargs)
@@ -73,6 +74,18 @@ class QuizView(DetailView):
         ]
 
         if self.request.user.is_authenticated():
+            if not self.request.user.contestant.created:
+                r = requests.post(
+                    self.create_user_url,
+                    json.dumps(
+                        dict(user=self.request.user.contestant.valid_name())
+                    ),
+                    timeout=1
+                )
+                rdata = json.loads(r.content.decode('utf-8'))
+                if rdata['response_code'] == 0:
+                    self.request.user.contestant.created = True
+                    self.request.user.contestant.save()
             snips = Snippet.objects.filter(
                 contestant=self.request.user.contestant,
                 quiz=self.object

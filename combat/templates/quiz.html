@@ -124,12 +124,15 @@
                     message = action.response_message;
                 var element = document.createElement('div'),
                     node = document.createTextNode(date.toString('[MM/dd h:mm:ss] ') + message),
-                    color = ['chartreuse ', 'hotpink'];
-                element.style.color = color[code];
+                    color = ['chartreuse ', 'orange', 'hotpink'];
+
+                if(code >= 0) {
+                    element.style.color = color[code];
+                }
                 element.appendChild(node);
                 $evaluate_console.append(element);
                 $evaluate_console.scrollTop($evaluate_console[0].scrollHeight);
-                if (code == 10) {
+                if (code == -10) {
                     $loading_icon.hide();
                     $btn_evaluate.prop('disabled', false);
                 }

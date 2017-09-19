@@ -31,6 +31,8 @@ class Contestant(models.Model):
     github = models.URLField(null=True, blank=True)
     linkedin = models.URLField(null=True, blank=True)
     facebook = models.URLField(null=True, blank=True)
+    last_update = models.DateTimeField(auto_now=True)
+    created = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "Contestant"
@@ -78,6 +80,7 @@ class Quiz(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=1023, unique=True)
     slug = models.SlugField(max_length=1023, unique=True)
+    dirname = models.CharField(max_length=1023)
     description = models.FileField(upload_to=quiz_directory_path, null=True, blank=True)
     answer_py = models.FileField(upload_to=quiz_directory_path, null=True, blank=True)
     answer_scala = models.FileField(upload_to=quiz_directory_path, null=True, blank=True)

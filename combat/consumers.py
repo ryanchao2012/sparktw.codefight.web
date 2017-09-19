@@ -9,10 +9,13 @@ from .utils import PseudoEvaluator
 from .forms import SnippetForm
 from .models import Snippet, Answer
 
+logger = logging.getLogger('django')
+
 
 class EvaluateConsumer(WebsocketConsumer):
 
     http_user_and_session = True
+
     def connection_groups(self, **kwargs):
         """
         Group(s) to make people join when they connect and leave when they disconnect.
@@ -26,43 +29,45 @@ class EvaluateConsumer(WebsocketConsumer):
 
     def receive(self, text=None, bytes=None, **kwargs):
 
-        self.send(
-            text=json.dumps({
-                'response_code': 9,
-                'response_message': 'Start running tests.',
-                'timestamp': time.time()
-            })
-        )
-
         if self.message.user.is_authenticated():
             data = json.loads(text)
             try:
-                snpt = Snippet.objects.get(contestant=data['contestant'], quiz=data['quiz'], language=data['language'])
+                snpt = Snippet.objects.get(
+                    contestant=data['contestant'],
+                    quiz=data['quiz'],
+                    language=data['language']
+                )
                 form = SnippetForm(data=data, instance=snpt)
             except Exception as err:
-                logging.warning(err)
+                logger.warning(err)
                 form = SnippetForm(data=data)
 
             if form.is_valid():
                 snippet = form.save()
 
-                has_pass = len(Answer.objects.filter(contestant=snippet.contestant, quiz=snippet.quiz)) > 0
+                has_pass = len(
+                    Answer.objects.filter(
+                        contestant=snippet.contestant,
+                        quiz=snippet.quiz
+                    )
+                ) > 0
 
                 to_dump = []
                 this_pass = True
-                result = PseudoEvaluator().eval(data)
+                testdata = dict(
+                    language=snippet.language,
+                    solution=snippet.body,
+                    subject=snippet.quiz.dirname,
+                    user=snippet.contestant.valid_name(),
+                    user_email=snippet.contestant.user.email
+                )
+                result = PseudoEvaluator().eval(testdata)
                 for r in result:
-                    this_pass = this_pass and r['response_code'] == 0
+                    if r['response_code'] >= 0:
+                        this_pass = this_pass and r['response_code'] == 0
                     to_dump.append(r)
                     self.send(text=json.dumps(r))
 
-                self.send(
-                    text=json.dumps({
-                        'response_code': 10,
-                        'response_message': 'Finished.',
-                        'timestamp': time.time()
-                    })
-                )
                 snippet.status = 'pass' if this_pass else 'fail'
                 snippet.run_result = '\n'.join([json.dumps(r) for r in to_dump])
                 snippet.is_running = False
@@ -101,4 +106,3 @@ class EvaluateConsumer(WebsocketConsumer):
         # self.message.reply_channel.send(message, immediately=True)
         for session in self.connection_groups():
             Group(session).send(message, immediately=True)
-
