@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
 from combat.models import (
-    Contestant, Quiz, Snippet
+    Contestant, Quiz, Snippet, Answer
 )
 
 
@@ -31,9 +31,13 @@ class SnippetAdmin(admin.ModelAdmin):
     # readonly_fields = ('script',)
 
 
+class AnswerAdmin(admin.ModelAdmin):
+    list_display = ('contestant', 'quiz', 'language', 'created', 'last_update')
+
 admin.site.register(Contestant, ContestantAdmin)
 admin.site.register(Quiz, QuizAdmin)
 admin.site.register(Snippet, SnippetAdmin)
+admin.site.register(Answer, AnswerAdmin)
 
 admin.site.unregister(User)
 admin.site.register(User, ExtendUserAdmin)

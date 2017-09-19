@@ -6,15 +6,18 @@
 
 html, body{
 	background-color: #eee8d5;
+	height: 100%;
 }
 
-a.btn-default {
-	color: #eee;
+a.btn-orange {
+	color: #ff8a3c;
 	background-color: transparent;
+	border-color: #ff8a3c;
 }
 
-a.btn-default:hover {
-	background-color: #fefaee;
+a.btn-orange:hover {
+	background-color: #ff8a3c;
+	color: #fff;
 }
 
 a {
@@ -55,10 +58,10 @@ a {
 }
 
 .form-sign {
-    max-width: 260px;
+    max-width: 280px;
     padding: 19px 29px 29px;
     margin: 50px auto;
-    background-color: #fff;
+    background-color: #eee;
     border: 1px solid #e5e5e5;
     border-radius: 5px;
 }
@@ -93,6 +96,13 @@ a {
 }
 
 .console {
-	background-color: #333;
+	background-color: #002B36;
 	color: #eee;
+	height: 250px;
+	padding: 10px;
+	overflow-y: auto;
+}
+
+.console>div:hover {
+	background-color: #555;
 }

@@ -1,26 +1,19 @@
 import logging
 import json
-import time
-import requests
 from django.core.files.storage import default_storage
 from django.conf import settings as django_settings
 from django.shortcuts import render
+from django.forms.models import model_to_dict
+
 from django.http import HttpResponse
 from django.views.generic import DetailView
-from django.views.decorators.http import (
-    require_POST
-)
-from django.shortcuts import redirect, reverse
 from django.core.serializers.json import DjangoJSONEncoder
-
-from ws4redis.publisher import RedisPublisher
-from ws4redis.redis_store import RedisMessage, SELF
-from django.utils import timezone
 
 from rest_framework.renderers import JSONRenderer
 
 from combat.models import Quiz, Snippet, Contestant
-from combat.forms import SnippetForm, ClientSnippetForm
+from combat.forms import LanguageForm
+from combat.utils import QuizData, SnippetData, MyDict
 
 # Create your views here.
 
@@ -49,79 +42,6 @@ def leaderboard(request):
     return render(request, 'ranking.html', {'contestants': contestants})
 
 
-@require_POST
-def evaluate(request):
-    logger.info("evaluate request received.")
-    ret = {'error': 0}
-    if request.user.is_authenticated():
-        incoming = request.POST.copy()
-
-        try:
-            snippet = Snippet.objects.get(contestant=incoming['contestant'], quiz=incoming['quiz'], language=incoming['language'])
-            form = SnippetForm(incoming, instance=snippet)
-        except Exception as err:
-            logger.warning(err)
-            form = SnippetForm(incoming)
-
-        if form.is_valid():
-            snippet = form.save(commit=False)
-            snippet.last_run = timezone.now()
-            snippet.run_count += 1
-            snippet.status = 'running'
-            snippet.save()
-
-            # TODO: backend callback
-            data = dict(
-                language='python',
-                solution=snippet.body,
-                subject=snippet.quiz.valid_name(),
-                subject_verbose=str(snippet.quiz),
-                user=snippet.contestant.valid_name(),
-                user_verbose=str(snippet.contestant)
-            )
-
-            response = requests.post(SPARK_SUBMIT, json=data)
-
-            if response.status_code == 200:
-                content = response.content.decode('utf-8')
-                result_from_spark = json.loads(content)
-                snippet.status = 'fail' if result_from_spark['response_code'] else 'pass'
-                snippet.run_result = content
-
-                snippet.save()
-                ret['run_result'] = content
-
-            # # dummy code:
-
-            # # load user's answer
-            # import importlib
-            # path = snippet.script.name
-            # # body = default_storage.open(snippet.script.path).read().decode('utf-8')
-            # # logger.info(body)
-            # module = path[:path.find('.')].replace('/', '.')
-            # module = '{}.{}'.format(django_settings.MEDIA_ROOT, module)
-            # h = importlib.import_module(module)
-
-            # # dummy testcase
-            # test_case = ['ryan1', 'ryan2', 'leo3', 'admin4', 'bla5'] * 5
-
-            # # socket, blocking operation, should apply asyn mechanism
-            # redis_publisher = RedisPublisher(facility=snippet.quiz.slug, users=[SELF], request=request)
-            # for i, tc in enumerate(test_case):
-            #     r = h.answer(tc)
-            #     time.sleep(0.001)
-            #     if r == 'Hello ' + tc:
-            #         redis_publisher.publish_message(RedisMessage('{}:pass'.format(i)))
-            #     else:
-            #         redis_publisher.publish_message(RedisMessage('{}:failed'.format(i)))
-
-    else:
-        ret['error'] = 1
-        ret['error_message'] = 'AnonymousUser'
-
-    return JSONResponse(ret)
-
-
 class QuizView(DetailView):
     template_name = 'quiz.html'
     model = Quiz
@@ -130,53 +50,68 @@ class QuizView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(QuizView, self).get_context_data(**kwargs)
 
-        if self.object.description:
-            content = default_storage.open(self.object.description.path).read().decode('utf-8')
-        else:
-            content = '### No description, good luck :p'
+        description = (
+            default_storage.open(self.object.description.path).read().decode('utf-8')
+            if self.object.description else '### No description.'
+        )
 
-        default_answer = '# Write your answer below.\n\n'
-        answer = {}
-        result = {}
-        running = False
-        languages = [
+        qdata = QuizData(
+            description=description,
+            title=self.object.title,
+            uid=self.object.uid.hex,
+            status=self.object.status,
+            difficulty=self.object.difficulty or 'tutorial',
+            reward=self.object.reward
+        )
+
+        snippets = MyDict()
+        current = None
+
+        templates = [
             ('python3', self.object.answer_py),
             ('scala', self.object.answer_scala)
         ]
+
         if self.request.user.is_authenticated():
-            snippet = Snippet.objects.filter(contestant=self.request.user.contestant, quiz=self.object).order_by('-last_run')
-            for lang, file in languages:
-                try:
-                    sn = snippet.get(language=lang)
-                    answer[lang] = sn.body
-                    result[lang] = sn.run_result or ''
-                    running = sn.status == 'running'
+            snips = Snippet.objects.filter(
+                contestant=self.request.user.contestant,
+                quiz=self.object
+            ).order_by('-last_run')
 
-                except:
-                    result[lang] = ''
-                    if bool(file):
-                        answer[lang] = default_storage.open(file.path).read().decode('utf-8')
-                    else:
-                        answer[lang] = default_answer
+            if bool(snips):
+                for s in snips:
+                    snippets[s.language] = SnippetData(
+                        language=s.language,
+                        body=s.body,
+                        uid=s.uid.hex,
+                        run_count=s.run_count,
+                        contestant_id=s.contestant.id,
+                        quiz_id=self.object.id,
+                        status=s.status,
+                        is_running=s.is_running
+                    )
+                    if not bool(current):
+                        current = snippets[s.language]
 
-            try:
-                form = ClientSnippetForm({'language': snippet[0].language}, instance=snippet[0])
-            except Exception as err:
-                logger.warning(err)
-                form = ClientSnippetForm({'language': 'python3'})
+        for lang, file in templates:
+            if lang not in snippets:
+                body = (
+                    default_storage.open(file.path).read().decode('utf-8')
+                    if bool(file) else '# Write your answer below.\n\n'
+                )
+                snippets[lang] = SnippetData(
+                    language=lang,
+                    body=body,
+                    quiz_id=self.object.id,
+                    contestant_id=self.request.user.contestant.id if self.request.user.is_authenticated() else -1,
+                )
 
-        else:
-            for lang, file in languages:
-                if bool(file):
-                    answer[lang] = default_storage.open(file.path).read().decode('utf-8')
-                else:
-                    answer[lang] = default_answer
-            form = ClientSnippetForm({'language': 'python3'})
+        if not bool(current):
+            current = snippets['python3']
 
-        context['description'] = content
-        context['snippet'] = form
-        context['answer'] = json.dumps(answer, cls=DjangoJSONEncoder)
-        context['result'] = json.dumps(result, cls=DjangoJSONEncoder)
-        context['running'] = running
+        context['form'] = LanguageForm(initial={'language': current.get('language', 'python3')})
+        context['quizdata'] = qdata
+        context['current'] = current
+        context['snippetdata'] = snippets
 
         return context

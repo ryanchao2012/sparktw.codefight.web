@@ -170,6 +170,9 @@ class Snippet(models.Model):
         null=True, blank=True
     )
 
+    is_running = models.BooleanField(default=False)
+    # is_pass = models.BooleanField(default=False)
+
     submit = models.BooleanField(default=False)
     submit_time = models.DateTimeField(null=True, blank=True)
 
@@ -195,3 +198,51 @@ class Snippet(models.Model):
 
     def __str__(self):
         return '{} @ {}'.format(self.quiz, self.contestant)
+
+
+def answer_directory_path(instance, filename):
+    subname = 'answer/{0}/{1}/{2}'.format(
+        instance.contestant.valid_name(), instance.quiz.valid_name(), instance.valid_name()
+    )
+    fullname = os.path.join(conf_settings.MEDIA_ROOT, subname)
+    if os.path.exists(fullname):
+        os.remove(fullname)
+    return subname
+
+
+class Answer(models.Model):
+    LANGUAGE_CHOICES = (
+        ('python3', 'python3'),
+        ('scala', 'scala')
+    )
+
+    uid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    language = models.CharField(
+        max_length=15,
+        choices=LANGUAGE_CHOICES,
+        default='python3'
+    )
+
+    contestant = models.ForeignKey(
+        'Contestant', models.SET_NULL,
+        null=True, blank=True
+    )
+
+    quiz = models.ForeignKey(
+        'Quiz', models.SET_NULL,
+        null=True, blank=True
+    )
+
+    body = models.TextField()
+    script = models.FileField(upload_to=answer_directory_path)
+
+    created = models.DateTimeField(auto_now_add=True)
+    last_update = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Answer"
+        verbose_name_plural = "Answer"
+        unique_together = ('contestant', 'quiz', 'language')
+
+    def valid_name(self):
+        return 'answer_{}'.format(self.uid.hex)

@@ -40,8 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'poke_around',
     'combat',
+    'channels',
     'auth',
-    'ws4redis',
     'django_nose',
 ]
 
@@ -55,12 +55,24 @@ NOSE_ARGS = [
     '--cover-package=combat,auth',
 ]
 
+# Channels settings
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgi_redis.RedisChannelLayer",  # use redis backend
+        "CONFIG": {
+            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],  # set redis address
+        },
+        "ROUTING": "sparktw.routing.channel_routing",  # load routing from our routing.py file
+    },
+}
+
+
 # WEBSOCKET_URL = '/ws/'
 # WS4REDIS_EXPIRE = 300
 # WS4REDIS_PREFIX = 'dj'
 # WSGI_APPLICATION = 'ws4redis.django_runserver.application'
 # WS4REDIS_HEARTBEAT = 'spark'
-WSGI_APPLICATION = 'sparktw.wsgi.application'
+# WSGI_APPLICATION = 'sparktw.wsgi.application'
 
 
 MIDDLEWARE = [

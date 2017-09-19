@@ -32,23 +32,18 @@
                         <a href="#markdown-preview" data-toggle="tab">Description</a>
                     </li>
                     <li>
-                        <a href="#evaluate-console" data-toggle="tab">Console</a>
+                        <a href="#evaluate-console" data-toggle="tab">Console<img src="{% static "img/loading.gif" %}" width="30px;" id="loading_icon" style="display: none;"></a>
                     </li>
                 </ul>
                 <div class="tab-content">
                     <div class="tab-pane active" id="markdown-preview" style="padding: 20px; background-color: #fefaee;"></div>
-                    <div class="tab-pane console" id="evaluate-console" style="height: 250px; padding: 20px;">
-                        {# Running console. #}
+                    <div class="tab-pane console" id="evaluate-console">
                     </div>
                 </div>
             </div>
             <div class="row" style="margin: 20px 0 5px;">
-            <form id="id_answer" method="post" action="{% url "evaluate" %}" novalidate>{% csrf_token %}
-            <input type="text" name="quiz" value="{{ quiz.id }}" hidden="true">
-            <input type="text" name="contestant" value="{{ user.contestant.id }}" hidden="true">
             
-                {{ snippet.language }}
-                {{ snippet.body }}
+                {{ form.language }}
                 
                 <select class="selectpicker" id="themepicker" data-width="150px">
                     <option>twilight</option>
@@ -56,147 +51,106 @@
                     <option>solarized_dark</option>
                 </select>
 
-                {# <input type="submit" name="submit" class="btn btn-danger pull-right" style="margin: 0 0 0 10px;" disabled="true"></input> #}
                 {% if user.is_authenticated %}
-                    <input type="submit" name="evaluate" value="執行" class="btn btn-primary pull-right" {% if running %} disabled {% endif %}>
+                    <button id="btn_evaluate" class="btn btn-primary pull-right">執行</button>
                 {% else %}
                     <a href="{% url "signup" %}?next={{ request.path }}"><button class="btn btn-primary pull-right">執行</button></a>
                 {% endif %}
-                
             
-            </form>
-            {# {% if not user.is_authenticated %} #}
-                {# <a href="{% url "signup" %}?next={{ request.path }}"><button class="btn btn-primary pull-right">執行</button></a> #}
-            {# {% endif %} #}
             </div>
             
             <div type="text" name="body" type="text" name="body" id="ace-editor"></div>
 
-	    <div id="result"></div>
-
-
-
         </div>
-    </div>
+</div>
 
 {% endblock main-content %}
 
 {% block extend-js %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/8.3.1/markdown-it.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.7/ace.js"></script>
-    <script src="{% static "js/ws4redis.js" %}"></script>
+    <script type="text/javascript" src="{% static "channels/js/websocketbridge.js" %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datejs/1.0/date.min.js"></script>
     <script type="text/javascript">
         var md = window.markdownit();
 
-//         var ws4redis = WS4Redis({
-//             uri: '{{ WEBSOCKET_URI }}{{ quiz.slug }}?subscribe-user',
-//             receive_message: receiveMessage,
-// //            heartbeat_msg: '^v^'
-//         });
-        var billboard = $('#result');
-//        $('#send_message').click(sendMessage);
-        // send message to the server using Ajax
-        function sendMessage() {
-        }
-        // receive a message though the Websocket from the server
-        function receiveMessage(msg) {
-	        console.log(msg);
-            billboard.append('<br/>' + msg);
-//            billboard.scrollTop(billboard.scrollTop() + 25);
+        const webSocketBridge = new channels.WebSocketBridge();
+        webSocketBridge.connect('/evaluate/');
+
+        var quizdata = JSON.parse("{{ quizdata|escapejs }}");
+        var snippetdata = JSON.parse("{{ snippetdata|escapejs }}");
+        var currdata = JSON.parse("{{ current|escapejs }}");
+
+        var $editor = ace.edit("ace-editor");
+        var $evaluate_console = $("#evaluate-console");
+        var $markdown_preview = $("#markdown-preview");
+        var $themepicker = $("#themepicker");
+        var $languagepicker = $("#id_language");
+        var $loading_icon = $("#loading_icon");
+        var $btn_evaluate = $('#btn_evaluate');
+
+        $markdown_preview.html(md.render(quizdata.description));
+
+        if(currdata.is_running) {
+            $loading_icon.show();
+            $btn_evaluate.prop('disabled', true);
+            $('.nav-tabs a[href="#evaluate-console"]').tab('show');
         }
 
-        var editor = ace.edit("ace-editor");
-        var evaluate_console = $("#evaluate-console");
-        var markdown_preview = $("#markdown-preview");
-        var themepicker = $("#themepicker");
-        var languagepicker = $("#id_language");
-        var body = $("#id_body");
-        var form = $("#id_answer");
-
-        themepicker.on("change", function(evt) {
-            editor.setTheme( "ace/theme/" + $(this).val());
+        $themepicker.on("change", function(evt) {
+            $editor.setTheme( "ace/theme/" + $(this).val());
         });
+        $themepicker.val(localStorage[quizdata.uid + "-theme"] || "twilight");
 
-        languagepicker.on("change", function(evt) {
-            editor.session.setMode("ace/mode/" + $(this).val().replace(/\d|\./g, ''));
+        $languagepicker.on("change", function(evt) {
+            $editor.session.setMode("ace/mode/" + $(this).val().replace(/\d|\./g, ''));
+            $editor.setValue(snippetdata[$(this).val()].body);
         })
-
-        var qslug = "{{ quiz.slug|escapejs }}";
-        var theme = localStorage[qslug + "-theme"] || "twilight";
-        var language = $("#id_language");
-        themepicker.val(theme);
-        languagepicker.val(language.val());
-
-        editor.setTheme( "ace/theme/" + themepicker.val());
-        editor.session.setMode("ace/mode/" + languagepicker.val().replace(/\d|\./g, ''));
-        editor.$blockScrolling = Infinity;
-        // console.log("{{ answer|escapejs }}");
-        var answer = JSON.parse("{{ answer|escapejs }}");
-        var last_result = JSON.parse("{{ result|escapejs }}");
-
-        editor.setValue(answer[language.val()]);
-        if ("{{ running|yesno:"true,false" }}" == 'true') {
-            evaluate_console.append('Running test cases ...');
-        } else {
-            evaluate_console.append(JSON.parse(last_result[language.val()]).response_message + '<br>');
-        }
-
-        language.on("change", function(evt) {
-            editor.setValue(answer[$(this).val()]);
-        });
         
+        $editor.setTheme( "ace/theme/" + $themepicker.val());
+        $editor.session.setMode("ace/mode/" + $languagepicker.val().replace(/\d|\./g, ''));
+        $editor.$blockScrolling = Infinity;
+        $editor.setValue(currdata.body);
 
-        editor.getSession().on('change', function(e) {
-            data = editor.getValue();
+        // Locally autosave
+        // $editor.getSession().on('change', function(e) {
+        //     data = $editor.getValue();
+        // });
+
+        webSocketBridge.listen(function(action, stream) {
+            var code = action.response_code,
+                date = new Date(action.timestamp * 1000);
+                message = action.response_message;
+            var element = document.createElement('div'),
+                node = document.createTextNode(date.toString('[MM/dd h:mm:ss] ') + message),
+                color = ['chartreuse ', 'hotpink'];
+            element.style.color = color[code];
+            element.appendChild(node);
+            $evaluate_console.append(element);
+            $evaluate_console.scrollTop($evaluate_console[0].scrollHeight);
+            if (code == 10) {
+                $loading_icon.hide();
+                $btn_evaluate.prop('disabled', false);
+            }
         });
 
-        form.submit(function(evt) {
-            var self = $(this);
-            var target = self.find("input[type=submit]:focus");
-            var action = '/' + target.attr('name') + '/';
-            var is_authenticated = "{{ user.is_authenticated|yesno:"true,false" }}" == 'true';
-            billboard.empty();
-            answer[language.val()] = editor.getValue();
-
+        $btn_evaluate.on('click', function(){
+            $(this).prop('disabled', true);
+            $loading_icon.show();
             // Show console tab and wait for result messages.
             $('.nav-tabs a[href="#evaluate-console"]').tab('show');
-
-            if (is_authenticated) {
-                evt.preventDefault();
-                body.val(editor.getValue());
-                _data = self.serialize();
-                $.ajax({
-                    url: "{% url 'evaluate' %}",
-                    method: 'post',
-                    data: _data,
-                    dataType: 'json',
-                    success: function(ret) {
-                        console.log("success");
-
-                        if(ret.run_result) {
-                            var run_result = JSON.parse(ret.run_result);
-                            evaluate_console.append(run_result.response_message + '<br>');
-                        }
-                    },
-                    error: function(ret) {
-                        console.log("error");
-                        console.log(ret);
-                    },
-                }); 
-            } 
-            // else {
-            //     var url = "{% url 'signup' %}";
-            //     var redirect = "{{ request.path|escapejs }}";
-            //     $.get(url + '?next=' + redirect);
-            // }
-         
+            webSocketBridge.send({
+                'language': $languagepicker.val(),
+                'body': $editor.getValue(),
+                'contestant': currdata.contestant_id,
+                'quiz': currdata.quiz_id
+            });
         });
+
 
         $(window).unload(function() {
-            localStorage[qslug + "-theme"] = themepicker.val();
+            localStorage[quizdata.uid + "-theme"] = $themepicker.val();
         });
-
-        markdown_preview.html(md.render("{{ description|escapejs }}"));
 
     </script>
 {% endblock %}
