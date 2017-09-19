@@ -61,6 +61,7 @@ CHANNEL_LAYERS = {
         "BACKEND": "asgi_redis.RedisChannelLayer",  # use redis backend
         "CONFIG": {
             "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],  # set redis address
+            "group_expiry": 300
         },
         "ROUTING": "sparktw.routing.channel_routing",  # load routing from our routing.py file
     },

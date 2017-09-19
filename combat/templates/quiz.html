@@ -73,8 +73,6 @@
     <script type="text/javascript">
         var md = window.markdownit();
 
-        const webSocketBridge = new channels.WebSocketBridge();
-        webSocketBridge.connect('/evaluate/');
 
         var quizdata = JSON.parse("{{ quizdata|escapejs }}");
         var snippetdata = JSON.parse("{{ snippetdata|escapejs }}");
@@ -116,36 +114,40 @@
         //     data = $editor.getValue();
         // });
 
-        webSocketBridge.listen(function(action, stream) {
-            var code = action.response_code,
-                date = new Date(action.timestamp * 1000);
-                message = action.response_message;
-            var element = document.createElement('div'),
-                node = document.createTextNode(date.toString('[MM/dd h:mm:ss] ') + message),
-                color = ['chartreuse ', 'hotpink'];
-            element.style.color = color[code];
-            element.appendChild(node);
-            $evaluate_console.append(element);
-            $evaluate_console.scrollTop($evaluate_console[0].scrollHeight);
-            if (code == 10) {
-                $loading_icon.hide();
-                $btn_evaluate.prop('disabled', false);
-            }
-        });
-
-        $btn_evaluate.on('click', function(){
-            $(this).prop('disabled', true);
-            $loading_icon.show();
-            // Show console tab and wait for result messages.
-            $('.nav-tabs a[href="#evaluate-console"]').tab('show');
-            webSocketBridge.send({
-                'language': $languagepicker.val(),
-                'body': $editor.getValue(),
-                'contestant': currdata.contestant_id,
-                'quiz': currdata.quiz_id
+        if (currdata.contestant_id >= 0) {
+            const webSocketBridge = new channels.WebSocketBridge();
+            webSocketBridge.connect('/evaluate/');
+    
+            webSocketBridge.listen(function(action, stream) {
+                var code = action.response_code,
+                    date = new Date(action.timestamp * 1000);
+                    message = action.response_message;
+                var element = document.createElement('div'),
+                    node = document.createTextNode(date.toString('[MM/dd h:mm:ss] ') + message),
+                    color = ['chartreuse ', 'hotpink'];
+                element.style.color = color[code];
+                element.appendChild(node);
+                $evaluate_console.append(element);
+                $evaluate_console.scrollTop($evaluate_console[0].scrollHeight);
+                if (code == 10) {
+                    $loading_icon.hide();
+                    $btn_evaluate.prop('disabled', false);
+                }
             });
-        });
-
+    
+            $btn_evaluate.on('click', function(){
+                $(this).prop('disabled', true);
+                $loading_icon.show();
+                // Show console tab and wait for result messages.
+                $('.nav-tabs a[href="#evaluate-console"]').tab('show');
+                webSocketBridge.send({
+                    'language': $languagepicker.val(),
+                    'body': $editor.getValue(),
+                    'contestant': currdata.contestant_id,
+                    'quiz': currdata.quiz_id
+                });
+            });
+	}
 
         $(window).unload(function() {
             localStorage[quizdata.uid + "-theme"] = $themepicker.val();

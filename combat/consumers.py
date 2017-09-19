@@ -13,14 +13,16 @@ from .models import Snippet, Answer
 class EvaluateConsumer(WebsocketConsumer):
 
     http_user_and_session = True
-
     def connection_groups(self, **kwargs):
         """
         Group(s) to make people join when they connect and leave when they disconnect.
 
         Make sure to return a list/tuple, not a string!
         """
-        return [self.message.channel_session['sessionid']]
+        if self.message.user.is_authenticated():
+            return [self.message.channel_session['sessionid']]
+        else:
+            return [self.message.channel_session._SessionBase__session_key]
 
     def receive(self, text=None, bytes=None, **kwargs):
 
