@@ -5,7 +5,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from channels.generic.websockets import WebsocketConsumer
 from channels import Group
-from .utils import PseudoEvaluator
+from .utils import PseudoEvaluator, SparkApiEvaluator
 from .forms import SnippetForm
 from .models import Snippet, Answer
 
@@ -61,7 +61,8 @@ class EvaluateConsumer(WebsocketConsumer):
                     user=snippet.contestant.valid_name(),
                     user_email=snippet.contestant.user.email
                 )
-                result = PseudoEvaluator().eval(testdata)
+                # result = PseudoEvaluator().eval(testdata)
+                result = SparkApiEvaluator().eval(testdata)
                 for r in result:
                     if r['response_code'] >= 0:
                         this_pass = this_pass and r['response_code'] == 0
