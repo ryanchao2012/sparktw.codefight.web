@@ -80,7 +80,7 @@ class UserSignupForm(UserCreationForm):
     def save(self, commit=True):
         instance = super(UserSignupForm, self).save(commit=False)
         email = instance.email
-        name = email[: email.find('@')]
+        name = email[: email.find('@')].replace('.', '').lower()
         try:
             repeat = RepeatUserName.objects.get(name=name)
             name += '.{}'.format(repeat.count + 1)

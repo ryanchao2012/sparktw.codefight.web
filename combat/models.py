@@ -45,7 +45,7 @@ class Contestant(models.Model):
             return '{}'.format(self.user.username)
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(self.user.username)
+        self.slug = slugify(self.user.username.replace('.', '-'))
         if not self.nickname:
             self.nickname = self.user.username
         super(Contestant, self).save(*args, **kwargs)

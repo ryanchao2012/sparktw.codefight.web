@@ -25,7 +25,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = config_parser.get('global', 'secret_key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = not config_parser.get('global', 'scenario').startswith('deploy')
 
 ALLOWED_HOSTS = config_parser.get('global', 'allow_hosts').split(' ')
 
