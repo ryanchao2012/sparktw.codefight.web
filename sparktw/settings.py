@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
-
+from configparser import RawConfigParser
+config_parser = RawConfigParser()
+config_parser.read('sparktw.config.ini')
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -20,12 +22,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SPARKTW_JD_SECRET_KEY', '1234567')
+SECRET_KEY = config_parser.get('global', 'secret_key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'sparktw.ml', 'www.sparktw.ml']
+ALLOWED_HOSTS = config_parser.get('global', 'allow_hosts').split(' ')
 
 
 # Application definition
@@ -38,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'poke_around',
+    'home',
     'combat',
     'channels',
     'auth',
@@ -51,8 +53,8 @@ TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 # Tell nose to measure coverage on the 'foo' and 'bar' apps
 NOSE_ARGS = [
     '--with-coverage',
-    # '--cover-html',
     '--cover-package=combat,auth',
+    # '--cover-html',
 ]
 
 # Channels settings
@@ -60,20 +62,12 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "asgi_redis.RedisChannelLayer",  # use redis backend
         "CONFIG": {
-            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],  # set redis address
+            "hosts": config_parser.get('global', 'redis_hosts').split(),  # set redis address
             "group_expiry": 300
         },
         "ROUTING": "sparktw.routing.channel_routing",  # load routing from our routing.py file
     },
 }
-
-
-# WEBSOCKET_URL = '/ws/'
-# WS4REDIS_EXPIRE = 300
-# WS4REDIS_PREFIX = 'dj'
-# WSGI_APPLICATION = 'ws4redis.django_runserver.application'
-# WS4REDIS_HEARTBEAT = 'spark'
-# WSGI_APPLICATION = 'sparktw.wsgi.application'
 
 
 MIDDLEWARE = [
@@ -163,8 +157,8 @@ LOGGING = {
     'disable_existing_loggers': False,
     'formatters': {
         'simple': {
-            'format': '[%(asctime)s %(module)s.%(funcName)s.%(lineno)d] %(levelname)s: %(message)s',
-            'datefmt': '%d/%b/%Y %H:%M:%S'
+            'format': '%(asctime)s - %(levelname)s - %(name)s.%(module)s.%(lineno)s: %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
         },
     },
     'handlers': {
@@ -176,6 +170,16 @@ LOGGING = {
     },
     'loggers': {
         'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'combat': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'myauth': {
             'handlers': ['console'],
             'level': 'INFO',
             'propagate': True,

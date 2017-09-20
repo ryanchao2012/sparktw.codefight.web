@@ -8,12 +8,15 @@ from channels import Group
 from .utils import PseudoEvaluator, SparkApiEvaluator
 from .forms import SnippetForm
 from .models import Snippet, Answer
+from configparser import RawConfigParser
+config_parser = RawConfigParser()
+config_parser.read('sparktw.config.ini')
 
-logger = logging.getLogger('django')
+scenario = config_parser.get('global', 'scenario')
 
 
 class EvaluateConsumer(WebsocketConsumer):
-
+    logger = logging.getLogger('combat')
     http_user_and_session = True
 
     def connection_groups(self, **kwargs):
@@ -29,6 +32,8 @@ class EvaluateConsumer(WebsocketConsumer):
 
     def receive(self, text=None, bytes=None, **kwargs):
 
+        self.logger.info('data received')
+
         if self.message.user.is_authenticated():
             data = json.loads(text)
             try:
@@ -39,13 +44,13 @@ class EvaluateConsumer(WebsocketConsumer):
                 )
                 form = SnippetForm(data=data, instance=snpt)
             except Exception as err:
-                logger.warning(err)
+                self.logger.warning(err)
                 form = SnippetForm(data=data)
 
             if form.is_valid():
                 snippet = form.save()
 
-                has_pass = len(
+                has_passed = len(
                     Answer.objects.filter(
                         contestant=snippet.contestant,
                         quiz=snippet.quiz
@@ -59,10 +64,15 @@ class EvaluateConsumer(WebsocketConsumer):
                     solution=snippet.body,
                     subject=snippet.quiz.dirname,
                     user=snippet.contestant.valid_name(),
-                    user_email=snippet.contestant.user.email
+                    user_email=snippet.contestant.user.email,
+                    has_passed=has_passed
                 )
-                # result = PseudoEvaluator().eval(testdata)
-                result = SparkApiEvaluator().eval(testdata)
+
+                if scenario == 'deploy':
+                    result = SparkApiEvaluator().eval(testdata)
+                else:
+                    result = PseudoEvaluator().eval(testdata)
+
                 for r in result:
                     if r['response_code'] >= 0:
                         this_pass = this_pass and r['response_code'] == 0
@@ -87,7 +97,7 @@ class EvaluateConsumer(WebsocketConsumer):
                     default_storage.delete(path)
                     ans.body = snippet.body
                     ans.script = default_storage.save(path, ContentFile(snippet.body))
-                    if not has_pass:
+                    if not has_passed:
                         snippet.contestant.sparko += snippet.quiz.reward
                         snippet.contestant.save()
                     ans.save()

@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import reverse
 from django.template.defaultfilters import slugify
 
-logger = logging.getLogger('django')
+logger = logging.getLogger('combat')
 
 # Create your tests here.
 
@@ -22,6 +22,7 @@ class QuizTest(TestCase):
 
         quiz.delete()
         self.assertFalse(Quiz.objects.filter(title=self.title).exists())
+
 
 @override_settings(MEDIA_ROOT='mock_media')
 class SnippetTest(TestCase):

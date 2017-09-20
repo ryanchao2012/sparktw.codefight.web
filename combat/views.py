@@ -15,12 +15,13 @@ from combat.models import Quiz, Snippet, Contestant
 from combat.forms import LanguageForm
 from combat.utils import QuizData, SnippetData, MyDict
 
+from configparser import RawConfigParser
+config_parser = RawConfigParser()
+config_parser.read('sparktw.config.ini')
+spark_backend_host = config_parser.get('global', 'spark_backend_host')
 # Create your views here.
 
-logger = logging.getLogger('django')
-
-SPARK_SUBMIT = 'http://35.187.234.136:3000/submit'  # curl -XPOST -d '{"user":"larry", "language":"python", "subject":"word_count", "solution":"ccc"}'  spark1.3du.me:3000/submit
-SPARK_CREATE = 'http://spark1.3du.me:3000/create/user'  # curl -XPOST -d '{"user":"dd"}' spark1.3du.me:3000/create/user
+logger = logging.getLogger('combat')
 
 
 class JSONResponse(HttpResponse):
@@ -46,7 +47,7 @@ class QuizView(DetailView):
     template_name = 'quiz.html'
     model = Quiz
     context_object_name = 'quiz'
-    create_user_url = 'http://35.198.254.175:3000/create/user'
+    create_user_url = 'http://{}/create/user'.format(spark_backend_host)
 
     def get_context_data(self, **kwargs):
         context = super(QuizView, self).get_context_data(**kwargs)

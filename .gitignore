@@ -2,3 +2,9 @@
 __pycache__/
 migrations/
 *.sql*
+*.ini
+/static/
+/media/
+.coverage
+htmlcov/
+

@@ -6,8 +6,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.utils.translation import ugettext_lazy as _
 
-
-logger = logging.getLogger('django')
+logger = logging.getLogger('myauth')
 
 
 class DuplicateUserException(Exception):
@@ -112,6 +111,7 @@ class UserSignupForm(UserCreationForm):
 
 
 class UserLoginForm(forms.Form):
+
     email = forms.EmailField(
         max_length=254,
         required=True,

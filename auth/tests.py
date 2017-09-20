@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from auth.models import RepeatUserName
 # Create your tests here.
 
-logger = logging.getLogger('django')
+logger = logging.getLogger('myauth')
 
 
 def create_user_(func):

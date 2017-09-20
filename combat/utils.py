@@ -4,7 +4,10 @@ import time
 import json
 import logging
 
-logger = logging.getLogger('django')
+from configparser import RawConfigParser
+config_parser = RawConfigParser()
+config_parser.read('sparktw.config.ini')
+spark_backend_host = config_parser.get('global', 'spark_backend_host')
 
 
 class MyDict(dict):
@@ -57,7 +60,9 @@ class EvaluateBase:
 
 
 class SparkApiEvaluator(EvaluateBase):
-    submit_url = 'http://35.198.254.175:3000/submit'
+    logger = logging.getLogger('combat')
+
+    submit_url = 'http://{}/submit'.format(spark_backend_host)
     timeout = 30  # sec
     code = {
         'error': 1,
@@ -75,6 +80,7 @@ class SparkApiEvaluator(EvaluateBase):
             timestamp=time.time()
         )
 
+        has_passed = data.get('has_passed', False)
         this_pass = False
 
         try:
@@ -91,21 +97,21 @@ class SparkApiEvaluator(EvaluateBase):
                 timestamp=time.time()  # TODO
             )
         except requests.ReadTimeout as err:
-            logger.warning(err)
+            self.logger.warning(err)
             yield dict(
                 response_code=self.code['error'],
                 response_message='Server timeout.',
                 timestamp=time.time()
             )
         except Exception as err:
-            logger.error(err)
+            self.logger.error(err)
             yield dict(
                 response_code=self.code['error'],
                 response_message='Unknown error occurred.',
                 timestamp=time.time()
             )
 
-        if this_pass:
+        if this_pass and (not has_passed):
             yield dict(
                 response_code=self.code['congrats'],
                 response_message='Congrats! You have passed this challenge.',
