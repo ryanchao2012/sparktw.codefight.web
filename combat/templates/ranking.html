@@ -20,7 +20,12 @@
                         <td scope="row">
                             <span class="label {% if forloop.first %} label-danger {% else %} label-primary {% endif %} label-as-badge">{{ forloop.counter }}</span>
                         </td>
-                        <td><a href="#">{{ cont.nickname }}</a></td>
+                        <td>
+                            <a href="#">{{ cont.nickname }}</a>
+                            {% if cont.user.is_staff %}
+                                <span class="label label-default label-as-badge" style="margin-left: 10px;">staff</span>
+                            {% endif %}
+                        </td>
                         <td><span class="label label-success label-as-badge">{{ cont.sparko }}</span></td>
                     </tr>
                 {% endfor %}

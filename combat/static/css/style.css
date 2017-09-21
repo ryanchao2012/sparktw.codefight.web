@@ -42,19 +42,17 @@ a {
 }
 
 .callout {
-	padding: 20px;
-	margin: 20px 0;
-	border: 1px solid #eee;
-	border-left-width: 5px;
-	border-radius: 3px;
+	padding: 10px;
+	margin: 10px 0;
+	border: 1px solid transparent;
 }
 
 .callout-default {
 	border-left-color: #777;
 }
 
-.callout-info {
-	border-left-color: #5bc0de;
+.callout-orange {
+	border-bottom-color: orange;
 }
 
 .form-sign {
@@ -79,9 +77,9 @@ a {
 	background-color: #e9d89d;
 }
 
-/*pre {
-	background-color: #e9d89d;
-}*/
+pre {
+	background-color: #282c34;
+}
 
 .btn-default {
 	background-color: #fefaee;
