@@ -57,9 +57,15 @@ class EvaluateConsumer(WebsocketConsumer):
 
                 to_dump = []
                 this_pass = True
+                prerequisite = (
+                    snippet.quiz.prerequisite_scala
+                    if snippet.language == 'scala'
+                    else snippet.quiz.prerequisite_py
+                )
+
                 testdata = dict(
                     language=snippet.language,
-                    solution=snippet.body,
+                    solution='{}\n\n{}\n'.format(prerequisite, snippet.body),
                     subject=snippet.quiz.dirname,
                     user=snippet.contestant.valid_name(),
                     user_email=snippet.contestant.user.email,

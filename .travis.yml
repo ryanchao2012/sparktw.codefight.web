@@ -22,3 +22,8 @@ before_script:
 script:
   - python manage.py test
 
+notifications:
+  slack:
+    rooms:
+      - okcomputer-ai:9lpj1KOqS9c5OyxkjGLkcTNn#travis-ci
+

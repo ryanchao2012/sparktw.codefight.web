@@ -82,9 +82,12 @@ class Quiz(models.Model):
     slug = models.SlugField(max_length=1023, unique=True)
     dirname = models.CharField(max_length=1023)
     description = models.FileField(upload_to=quiz_directory_path, null=True, blank=True)
-    answer_py = models.FileField(upload_to=quiz_directory_path, null=True, blank=True)
-    answer_scala = models.FileField(upload_to=quiz_directory_path, null=True, blank=True)
+    prerequisite_py = models.TextField(blank=True, null=True)
+    template_py = models.FileField(upload_to=quiz_directory_path, null=True, blank=True)
+    prerequisite_scala = models.TextField(blank=True, null=True)
+    template_scala = models.FileField(upload_to=quiz_directory_path, null=True, blank=True)
     reward = models.IntegerField(default=0)
+    submits = models.IntegerField(default=0)
     success_rate = models.FloatField(default=0.0, null=True, blank=True)
 
     created = models.DateTimeField(auto_now_add=True)
@@ -93,7 +96,7 @@ class Quiz(models.Model):
     difficulty = models.CharField(
         max_length=15,
         choices=DIFFICULT_CHOICES,
-        default='easy',
+        default='tutorial',
         null=True, blank=True
     )
     status = models.CharField(
