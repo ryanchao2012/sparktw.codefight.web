@@ -7,4 +7,5 @@ migrations/
 /media/
 .coverage
 htmlcov/
-
+*.log
+/conf/

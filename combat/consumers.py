@@ -32,8 +32,6 @@ class EvaluateConsumer(WebsocketConsumer):
 
     def receive(self, text=None, bytes=None, **kwargs):
 
-        self.logger.info('data received')
-
         if self.message.user.is_authenticated():
             data = json.loads(text)
             try:
