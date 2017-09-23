@@ -5,26 +5,41 @@
 {% if quizs %}
 
 <div class="row">
-    <div class="col-md-5 col-md-offset-0">
+    <div class="col-md-8 col-md-offset-0">
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
                   <th>Difficulty</th>
                   <th>Title</th>
                   <th>Reward</th>
+                  <th>Submits</th>
+                  <th>Passed</th>
                 </tr>
             </thead>
             <tbody>
                 {% for q in quizs %}
                     <tr>
-                        <td scope="row"><span class="label label-success label-as-badge">{{ q.difficulty }}</span></td>
+                        <td scope="row"><span class="label 
+                        {% if q.difficulty == 'tutorial' %}
+                            label-primary
+                        {% elif q.difficulty == 'easy' %}
+                            label-success
+                        {% elif q.difficulty == 'medium' %}
+                            label-warning
+                        {% elif q.difficulty == 'hard' %}
+                            label-danger
+                        {% else %}
+                            label-default
+                        {% endif %} label-as-badge">{{ q.difficulty }}</span></td>
                         <td>
                             <a id="quiz" href="{% url "quiz" slug=q.slug %}">{{ q.title }}</a>
                             {% if q.status == "draft" %}
-                                <span class="label label-default label-as-badge" style="margin-left: 10px;">{{ q.status }}</span>
+                                <span class="label label-info label-as-badge" style="margin-left: 10px;">{{ q.status }}</span>
                             {% endif %}
                         </td>
-                        <td>{{ q.reward }}</td>
+                        <td><span class="label label-warning label-as-badge">{{ q.reward }}</span></td>
+                        <td>{{ q.submits }}</td>
+                        <td>{{ q.passes }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

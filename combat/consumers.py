@@ -54,6 +54,8 @@ class EvaluateConsumer(WebsocketConsumer):
                         quiz=snippet.quiz
                     )
                 ) > 0
+                if not has_passed:
+                    snippet.quiz.submits += 1
 
                 to_dump = []
                 this_pass = True
@@ -87,7 +89,7 @@ class EvaluateConsumer(WebsocketConsumer):
                 snippet.run_result = '\n'.join([json.dumps(r) for r in to_dump])
                 snippet.is_running = False
                 if this_pass:
-                    ans, _ = Answer.objects.get_or_create(
+                    ans, created = Answer.objects.get_or_create(
                         quiz=snippet.quiz,
                         contestant=snippet.contestant,
                         language=snippet.language,
@@ -101,10 +103,20 @@ class EvaluateConsumer(WebsocketConsumer):
                     default_storage.delete(path)
                     ans.body = snippet.body
                     ans.script = default_storage.save(path, ContentFile(snippet.body))
+                    if created:
+                        snippet.quiz.passes += 1
+                        if has_passed:
+                            snippet.quiz.submits += 1
+                        ans.elapsed = snippet.last_run - snippet.created
+                        ans.submits = snippet.run_count
+
                     if not has_passed:
                         snippet.contestant.sparko += snippet.quiz.reward
+                        snippet.contestant.elapsed += ans.elapsed
+                        snippet.contestant.submits += ans.submits
                         snippet.contestant.save()
                     ans.save()
+                snippet.quiz.save()
                 snippet.save()
 
     def send(self, text=None, bytes=None, close=False):

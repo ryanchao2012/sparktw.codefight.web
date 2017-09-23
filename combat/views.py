@@ -34,23 +34,19 @@ class JSONResponse(HttpResponse):
 
 
 def challenges(request):
-    if request.user.is_staff:
-        quizs = Quiz.objects.all()[:50]
-    else:
-        quizs = Quiz.objects.filter(status='published')[:50]
+    quizs = Quiz.objects.all()
+    if not request.user.is_staff:
+        quizs = quizs.filter(status='published')
     return render(request, 'challenges.html', {'quizs': quizs})
 
 
 def leaderboard(request):
-    if request.user.is_staff:
-        contestants = Contestant.objects \
-            .filter(sparko__gte=0) \
-            .order_by('-sparko')[:100]
-    else:
-        contestants = Contestant.objects \
-            .filter(user__is_staff=False) \
-            .filter(sparko__gte=0) \
-            .order_by('-sparko')[:100]
+    contestants = Contestant.objects \
+        .filter(sparko__gte=0) \
+        .order_by('-sparko', 'last_update', 'submits', 'elapsed')
+
+    if not request.user.is_staff:
+        contestants = contestants.filter(user__is_staff=False)
     return render(request, 'ranking.html', {'contestants': contestants})
 
 

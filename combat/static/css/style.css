@@ -77,9 +77,10 @@ a {
 	background-color: #e9d89d;
 }
 
-pre {
-	background-color: #fefbec;
+pre, code.hljs {
+	background-color: #ffffe5;
 }
+
 
 .btn-default {
 	background-color: #fefaee;

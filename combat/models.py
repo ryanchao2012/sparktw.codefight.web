@@ -1,5 +1,6 @@
 import os
 import uuid
+import datetime
 from django.conf import settings as conf_settings
 from django.db import models
 from django.contrib.auth.models import User
@@ -33,6 +34,8 @@ class Contestant(models.Model):
     facebook = models.URLField(null=True, blank=True)
     last_update = models.DateTimeField(auto_now=True)
     created = models.BooleanField(default=False)
+    submits = models.IntegerField(default=0)
+    elapsed = models.DurationField(default=datetime.timedelta, blank=True, null=True)
 
     class Meta:
         verbose_name = "Contestant"
@@ -88,7 +91,7 @@ class Quiz(models.Model):
     template_scala = models.FileField(upload_to=quiz_directory_path, null=True, blank=True)
     reward = models.IntegerField(default=0)
     submits = models.IntegerField(default=0)
-    success_rate = models.FloatField(default=0.0, null=True, blank=True)
+    passes = models.IntegerField(default=0)
 
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
@@ -244,6 +247,8 @@ class Answer(models.Model):
 
     created = models.DateTimeField(auto_now_add=True)
     last_update = models.DateTimeField(auto_now=True)
+    submits = models.IntegerField(default=0)
+    elapsed = models.DurationField(blank=True, null=True)
 
     class Meta:
         verbose_name = "Answer"
