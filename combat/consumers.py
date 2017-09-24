@@ -10,9 +10,11 @@ from .forms import SnippetForm
 from .models import Snippet, Answer
 from configparser import RawConfigParser
 config_parser = RawConfigParser()
-config_parser.read('sparktw.config.ini')
-
-scenario = config_parser.get('global', 'scenario')
+configfile = config_parser.read('sparktw.config.ini')
+if bool(configfile):
+    scenario = config_parser.get('global', 'scenario')
+else:
+    scenario = 'develope'
 
 
 class EvaluateConsumer(WebsocketConsumer):

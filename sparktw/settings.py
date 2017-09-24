@@ -11,9 +11,21 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
+
 from configparser import RawConfigParser
 config_parser = RawConfigParser()
-config_parser.read('sparktw.config.ini')
+configfile = config_parser.read('sparktw.config.ini')
+
+if bool(configfile):
+    secret_key = config_parser.get('global', 'secret_key')
+    allow_hosts = config_parser.get('global', 'allow_hosts').split(' ')
+    debug_mode = not config_parser.get('global', 'scenario').startswith('deploy')
+    redis_hosts = config_parser.get('global', 'redis_hosts').split()
+else:
+    secret_key = 'my-secert-key'
+    allow_hosts = ['localhost', '127.0.0.1']
+    redis_hosts = ['redis://localhost:6379']
+    debug_mode = True
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -22,12 +34,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.10/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config_parser.get('global', 'secret_key')
+SECRET_KEY = secret_key
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = not config_parser.get('global', 'scenario').startswith('deploy')
+DEBUG = debug_mode
 
-ALLOWED_HOSTS = config_parser.get('global', 'allow_hosts').split(' ')
+ALLOWED_HOSTS = allow_hosts
 
 
 # Application definition
@@ -62,7 +74,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "asgi_redis.RedisChannelLayer",  # use redis backend
         "CONFIG": {
-            "hosts": config_parser.get('global', 'redis_hosts').split(),  # set redis address
+            "hosts": redis_hosts,  # set redis address
             "group_expiry": 300
         },
         "ROUTING": "sparktw.routing.channel_routing",  # load routing from our routing.py file

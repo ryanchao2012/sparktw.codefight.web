@@ -17,8 +17,11 @@ from combat.utils import QuizData, SnippetData, MyDict
 
 from configparser import RawConfigParser
 config_parser = RawConfigParser()
-config_parser.read('sparktw.config.ini')
-spark_backend_host = config_parser.get('global', 'spark_backend_host')
+configfile = config_parser.read('sparktw.config.ini')
+if bool(configfile):
+    spark_backend_host = config_parser.get('global', 'spark_backend_host')
+else:
+    spark_backend_host = 'localhost:3000'
 # Create your views here.
 
 logger = logging.getLogger('combat')
