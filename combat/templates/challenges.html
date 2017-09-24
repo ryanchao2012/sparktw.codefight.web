@@ -1,4 +1,5 @@
 {% extends "index.html" %}
+{% load combat_tags %}
 
 {% block main-content %}
 
@@ -32,12 +33,12 @@
                             label-default
                         {% endif %} label-as-badge">{{ q.difficulty }}</span></td>
                         <td>
-                            <a id="quiz" href="{% url "quiz" slug=q.slug %}">{{ q.title }}</a>
+                            <a id="quiz" href="{% url "quiz" slug=q.slug %}">{{ q.title|pretty_title }}</a>
                             {% if q.status == "draft" %}
                                 <span class="label label-info label-as-badge" style="margin-left: 10px;">{{ q.status }}</span>
                             {% endif %}
                         </td>
-                        <td><span class="label label-warning label-as-badge">{{ q.reward }}</span></td>
+                        <td><span class="label label-info label-as-badge">{{ q.reward }}</span></td>
                         <td>{{ q.submits }}</td>
                         <td>{{ q.passes }}</td>
                     </tr>
