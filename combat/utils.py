@@ -103,7 +103,7 @@ class SparkApiEvaluator(EvaluateBase):
             self.logger.warning(err)
             yield dict(
                 response_code=self.code['error'],
-                response_message='Server timeout.',
+                response_message='Server busy. Try again later.',
                 timestamp=time.time()
             )
         except Exception as err:
