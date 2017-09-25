@@ -43,21 +43,24 @@ class EvaluateConsumer(WebsocketConsumer):
                     language=data['language']
                 )
                 form = SnippetForm(data=data, instance=snpt)
+                is_lazy = form.initial['body'] == form.data['body']
             except Exception as err:
                 self.logger.warning(err)
                 form = SnippetForm(data=data)
+                is_lazy = False
+            # print('@@@@', bool(form.initial))
+            # is_lazy = 'body' in form.initial and form.initial['body'] == form.data['body']
 
             if form.is_valid():
                 snippet = form.save()
 
-                has_passed = len(
-                    Answer.objects.filter(
-                        contestant=snippet.contestant,
-                        quiz=snippet.quiz
-                    )
-                ) > 0
-                if not has_passed:
-                    snippet.quiz.submits += 1
+                passed_answers = Answer.objects.filter(
+                    contestant=snippet.contestant,
+                    quiz=snippet.quiz
+                )
+
+                has_passed = len(passed_answers) > 0
+                this_lang_has_passed = len(passed_answers.filter(language=snippet.language)) > 0
 
                 to_dump = []
                 this_pass = True
@@ -90,25 +93,27 @@ class EvaluateConsumer(WebsocketConsumer):
                 snippet.status = 'pass' if this_pass else 'fail'
                 snippet.run_result = '\n'.join([json.dumps(r) for r in to_dump])
                 snippet.is_running = False
+
+                if not (this_lang_has_passed or is_lazy):
+                    snippet.quiz.submits += 1
                 if this_pass:
                     ans, created = Answer.objects.get_or_create(
                         quiz=snippet.quiz,
                         contestant=snippet.contestant,
                         language=snippet.language,
                     )
-                    path = 'answer/{0}/{1}/{2}.{3}'.format(
-                        ans.contestant.valid_name(),
-                        ans.quiz.valid_name(),
-                        ans.valid_name(),
-                        'scala' if 'scala' in ans.language else 'py'
-                    )
-                    default_storage.delete(path)
-                    ans.body = snippet.body
-                    ans.script = default_storage.save(path, ContentFile(snippet.body))
+                    if created or (not is_lazy):
+                        path = 'answer/{0}/{1}/{2}.{3}'.format(
+                            ans.contestant.valid_name(),
+                            ans.quiz.valid_name(),
+                            ans.valid_name(),
+                            'scala' if 'scala' in ans.language else 'py'
+                        )
+                        default_storage.delete(path)
+                        ans.body = snippet.body
+                        ans.script = default_storage.save(path, ContentFile(snippet.body))
                     if created:
                         snippet.quiz.passes += 1
-                        if has_passed:
-                            snippet.quiz.submits += 1
                         ans.elapsed = snippet.last_run - snippet.created
                         ans.submits = snippet.run_count
 
@@ -116,8 +121,8 @@ class EvaluateConsumer(WebsocketConsumer):
                         snippet.contestant.sparko += snippet.quiz.reward
                         snippet.contestant.elapsed += ans.elapsed
                         snippet.contestant.submits += ans.submits
-                        snippet.contestant.save()
                     ans.save()
+                snippet.contestant.save()
                 snippet.quiz.save()
                 snippet.save()
 
