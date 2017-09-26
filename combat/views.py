@@ -5,13 +5,14 @@ from django.conf import settings as django_settings
 from django.shortcuts import render
 from django.forms.models import model_to_dict
 import requests
+from django.utils import timezone
 from django.http import HttpResponse
 from django.views.generic import DetailView
 from django.core.serializers.json import DjangoJSONEncoder
 
 from rest_framework.renderers import JSONRenderer
 
-from combat.models import Quiz, Snippet, Contestant
+from combat.models import Quiz, Snippet, Contestant, Answer
 from combat.forms import LanguageForm
 from combat.utils import QuizData, SnippetData, MyDict
 
@@ -85,7 +86,9 @@ class QuizView(DetailView):
         ]
 
         if self.request.user.is_authenticated():
-            if not self.request.user.contestant.created:
+            if not (django_settings.DEBUG or self.request.user.contestant.created):
+
+                # TODO: this api should be issued by backend workers, ex: Celery.
                 r = requests.post(
                     self.create_user_url,
                     json.dumps(
@@ -97,6 +100,11 @@ class QuizView(DetailView):
                 if rdata['response_code'] == 0:
                     self.request.user.contestant.created = True
                     self.request.user.contestant.save()
+
+            answers = Answer.objects.filter(
+                contestant=self.request.user.contestant,
+                quiz=self.object
+            )
             snips = Snippet.objects.filter(
                 contestant=self.request.user.contestant,
                 quiz=self.object
@@ -104,6 +112,8 @@ class QuizView(DetailView):
 
             if bool(snips):
                 for s in snips:
+                    is_pass = answers.filter(language=s.language).exists()
+                    elapsed = (timezone.now() - s.created).total_seconds()
                     snippets[s.language] = SnippetData(
                         language=s.language,
                         body=s.body,
@@ -112,7 +122,11 @@ class QuizView(DetailView):
                         contestant_id=s.contestant.id,
                         quiz_id=self.object.id,
                         status=s.status,
-                        is_running=s.is_running
+                        is_submit=True,
+                        is_running=s.is_running,
+                        is_pass=is_pass,
+                        elapsed=answers.get(language=s.language).elapsed.total_seconds() if is_pass else elapsed,
+                        created=s.created.timestamp()
                     )
                     if not bool(current):
                         current = snippets[s.language]
@@ -128,6 +142,7 @@ class QuizView(DetailView):
                     body=body,
                     quiz_id=self.object.id,
                     contestant_id=self.request.user.contestant.id if self.request.user.is_authenticated() else -1,
+                    created=timezone.now().timestamp()
                 )
 
         if not bool(current):

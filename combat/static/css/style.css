@@ -9,6 +9,14 @@ html, body{
 	height: 100%;
 }
 
+.label-warning {
+	background-color: #FF9800;
+}
+
+.label-purple {
+	background-color: #9c27b0;
+}
+
 a.btn-orange {
 	color: #ff8a3c;
 	background-color: transparent;
@@ -52,7 +60,7 @@ a {
 }
 
 .callout-orange {
-	border-bottom-color: orange;
+	border-bottom-color: #ff5722;
 }
 
 .form-sign {

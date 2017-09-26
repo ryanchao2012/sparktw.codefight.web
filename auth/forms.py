@@ -24,7 +24,7 @@ class UserSignupForm(UserCreationForm):
             attrs={
                 'class': 'form-control',
                 'placeholder': 'Email',
-                'pattern': '[a-z,A-Z,0-9,_,\.]+@[a-z,A-Z]+\.[a-z,A-Z]+',
+                'pattern': '[a-z,A-Z,0-9,_,\.]+@[a-z,A-Z,0-9,_,\.]+',
                 'data-valid-min': '8',
             }
         )
@@ -119,7 +119,7 @@ class UserLoginForm(forms.Form):
             attrs={
                 'class': 'form-control',
                 'placeholder': 'Email',
-                'pattern': '[a-z,A-Z,0-9,_]+@[a-z,A-Z]+\.[a-z,A-Z]+',
+                'pattern': '[a-z,A-Z,0-9,_,\.]+@[a-z,A-Z,0-9,_,\.]+',
                 'data-valid-min': '8',
             }
         )

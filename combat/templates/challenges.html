@@ -31,7 +31,7 @@
                             label-danger
                         {% else %}
                             label-default
-                        {% endif %} label-as-badge">{{ q.difficulty }}</span></td>
+                        {% endif %} label-as-badge">{{ q.difficulty|pretty_title }}</span></td>
                         <td>
                             <a id="quiz" href="{% url "quiz" slug=q.slug %}">{{ q.title|pretty_title }}</a>
                             {% if q.status == "draft" %}

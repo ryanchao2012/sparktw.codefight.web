@@ -1,4 +1,5 @@
 import random
+import datetime
 import requests
 import time
 import json
@@ -44,7 +45,11 @@ class SnippetData(MyDict):
     quiz_id = -1
     status = ''
     uid = ''
+    is_submit = False
     is_running = False
+    is_pass = False
+    elapsed = datetime.timedelta().total_seconds()
+    created = datetime.datetime.now().timestamp()
 
 
 class EvaluateBase:

@@ -13,7 +13,10 @@ def pretty_duration(td):
 
     return '{} hr {} min {} sec'.format(hours, minutes, seconds)
 
+
 @register.filter
 def pretty_title(tt):
-    return tt.title()
-
+    if tt:
+        return tt.title()
+    else:
+        return tt

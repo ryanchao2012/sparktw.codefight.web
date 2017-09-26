@@ -1,6 +1,7 @@
 {% extends "index.html" %}
 
 {% load i18n admin_static %}
+{% load combat_tags %}
 
 {% block extend-style %}
 <style>
@@ -20,10 +21,29 @@
 <div class="row">
         <div class="col-md-10 col-md-offset-1">
             <div class="callout callout-orange">
-                <h1>{{ quizdata.title }}</h1>
-                {# <p>This question is currently in draft mode.</p> #}
-                {# <p>If you feel the problem description is inaccurate or found missing test cases, please  #}
-                {# <a href="#">go to Discuss</a> and post a new topic.</p> #}
+                <span class="label 
+                            {% if quizdata.difficulty == 'tutorial' %}
+                                label-primary
+                            {% elif quizdata.difficulty == 'easy' %}
+                                label-success
+                            {% elif quizdata.difficulty == 'medium' %}
+                                label-warning
+                            {% elif quizdata.difficulty == 'hard' %}
+                                label-danger
+                            {% else %}
+                                label-default
+                            {% endif %} label-as-badge">
+                            {{ quizdata.difficulty|pretty_title }}
+                </span>
+                &nbsp;
+                <span class="label label-purple label-as-badge">
+                    <span class="glyphicon glyphicon-star"></span>
+                    {{ quizdata.reward }}
+                </span>
+                &nbsp;
+                <span id="elapsed_timer" class="label label-default label-as-badge"></span>
+                
+                <h1>{{ quizdata.title|pretty_title }}</h1>
             </div>
 
             <div class="tabbable">
@@ -76,9 +96,8 @@
     <script>hljs.initHighlightingOnLoad();</script>
 
     <script type="text/javascript">
+
         var md = window.markdownit();
-
-
         var quizdata = JSON.parse("{{ quizdata|escapejs }}");
         var snippetdata = JSON.parse("{{ snippetdata|escapejs }}");
         var currdata = JSON.parse("{{ current|escapejs }}");
@@ -90,6 +109,23 @@
         var $languagepicker = $("#id_language");
         var $loading_icon = $("#loading_icon");
         var $btn_evaluate = $('#btn_evaluate');
+        var $elapsed_timer = $('#elapsed_timer');
+
+        var update_elapsed = function() {
+            var lang = $languagepicker.val();
+            $elapsed_timer.empty();
+            if(snippetdata[lang].is_submit) {
+                if(snippetdata[lang].is_pass) {
+                    $elapsed_timer.text(format_elapsed(snippetdata[lang].elapsed));
+                } else {
+                    $elapsed_timer.text(format_elapsed($.now()/1000 - snippetdata[lang].created));
+                }
+            }
+        }
+        update_elapsed();
+        
+
+        
 
         $markdown_preview.html(md.render(quizdata.description));
 
@@ -107,7 +143,9 @@
         $languagepicker.on("change", function(evt) {
             $editor.session.setMode("ace/mode/" + $(this).val().replace(/\d|\./g, ''));
             $editor.setValue(snippetdata[$(this).val()].body);
+            update_elapsed();
         })
+        setInterval(update_elapsed, 1000);
         
         $editor.setTheme( "ace/theme/" + $themepicker.val());
         $editor.session.setMode("ace/mode/" + $languagepicker.val().replace(/\d|\./g, ''));
@@ -133,6 +171,9 @@
 
                 if(code >= 0) {
                     element.style.color = color[code];
+                } else if (code == -1) {
+                    snippetdata[$languagepicker.val()].is_pass = true;
+                    snippetdata[$languagepicker.val()].elapsed = $.now()/1000 - snippetdata[$languagepicker.val()].created;
                 }
                 element.appendChild(node);
                 $evaluate_console.append(element);
@@ -146,6 +187,10 @@
             $btn_evaluate.on('click', function(){
                 $(this).prop('disabled', true);
                 $loading_icon.show();
+                if (!snippetdata[$languagepicker.val()].is_submit) {
+                    snippetdata[$languagepicker.val()].is_submit = true;
+                    snippetdata[$languagepicker.val()].created = $.now() / 1000;
+                }
                 // Show console tab and wait for result messages.
                 $('.nav-tabs a[href="#evaluate-console"]').tab('show');
                 webSocketBridge.send({
