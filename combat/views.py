@@ -94,7 +94,7 @@ class QuizView(DetailView):
                     json.dumps(
                         dict(user=self.request.user.contestant.valid_name())
                     ),
-                    timeout=1
+                    timeout=5
                 )
                 rdata = json.loads(r.content.decode('utf-8'))
                 if rdata['response_code'] == 0:

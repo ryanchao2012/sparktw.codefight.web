@@ -4,6 +4,7 @@ import logging
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from channels.generic.websockets import WebsocketConsumer
+from django.utils import timezone
 from channels import Group
 from .utils import PseudoEvaluator, SparkApiEvaluator
 from .forms import SnippetForm
@@ -114,7 +115,7 @@ class EvaluateConsumer(WebsocketConsumer):
                         ans.script = default_storage.save(path, ContentFile(snippet.body))
                     if created:
                         snippet.quiz.passes += 1
-                        ans.elapsed = snippet.last_run - snippet.created
+                        ans.elapsed = timezone.now() - snippet.created
                         ans.submits = snippet.run_count
 
                     if not has_passed:
