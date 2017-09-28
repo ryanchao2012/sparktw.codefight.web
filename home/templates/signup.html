@@ -1,7 +1,11 @@
 {% extends "index.html" %}
 {% load i18n admin_static %}
 
-
+{% block body-property %} 
+{% endblock body-property %}
+{% block extend-style %}
+<link href="//vjs.zencdn.net/5.4.6/video-js.min.css" rel="stylesheet">
+{% endblock extend-style %}
 {% block main-content %}
 <div>
     <form class="form-sign" id="formSignup" action="{% url "signup" %}?next={{ next }}" method="post">
@@ -10,8 +14,6 @@
         <input class="btn btn-primary pull-right" type="submit" id="btnSignup">
         </h2>
         <hr>
-        {# <input class="form-control" name="username" id="username" type="text" placeholder="Username" pattern="[a-z,A-Z,0-9,_]+" data-valid-min="6" title="Enter your name"><br> #}
-        
         {% for field in form %}
             {% for error in field.errors %}
                 <div class="errorlist">* {{ error }}</div>
@@ -20,4 +22,12 @@
         {% endfor %}
     </form>
 </div>
+
 {% endblock %}
+
+{% block extend-js %}
+    <script src="http://vjs.zencdn.net/6.2.7/video.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/BigVideo.js/1.1.5/lib/bigvideo.min.js"></script>
+
+
+{% endblock extend-js %}

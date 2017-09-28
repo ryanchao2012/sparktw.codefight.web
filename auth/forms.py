@@ -5,12 +5,49 @@ from auth.models import RepeatUserName
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.utils.translation import ugettext_lazy as _
-
+from combat.models import Contestant
 logger = logging.getLogger('myauth')
 
 
 class DuplicateUserException(Exception):
     pass
+
+
+class ProfileForm(forms.ModelForm):
+    class Meta:
+        model = Contestant
+        fields = ('nickname', 'github', 'linkedin', 'facebook')
+        widgets = {
+            'nickname': forms.TextInput(
+                attrs={
+                    'style': 'width: 295px;',
+                }
+            ),
+            'github': forms.URLInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Optional',
+                }
+            ),
+            'linkedin': forms.URLInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Optional',
+                }
+            ),
+            'facebook': forms.URLInput(
+                attrs={
+                    'class': 'form-control',
+                    'placeholder': 'Optional',
+                }
+            )
+        }
+
+    def clean_nickname(self):
+        nickname = self.cleaned_data.get('nickname')
+        if (not bool(nickname)) or (not bool(nickname.strip())):
+            raise forms.ValidationError('Nickname cannot be empty.')
+        return nickname
 
 
 class UserSignupForm(UserCreationForm):

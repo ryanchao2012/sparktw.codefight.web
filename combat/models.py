@@ -57,7 +57,7 @@ class Contestant(models.Model):
         return 'user_{}'.format(self.uid.hex)
 
     def get_absolute_url(self):
-        return reverse('profile', kwargs={'slug': self.slug})
+        return reverse('profile_view', kwargs={'slug': self.slug})
 
 
 def quiz_directory_path(instance, filename):

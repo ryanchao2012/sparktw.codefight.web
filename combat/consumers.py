@@ -49,8 +49,6 @@ class EvaluateConsumer(WebsocketConsumer):
                 self.logger.warning(err)
                 form = SnippetForm(data=data)
                 is_lazy = False
-            # print('@@@@', bool(form.initial))
-            # is_lazy = 'body' in form.initial and form.initial['body'] == form.data['body']
 
             if form.is_valid():
                 snippet = form.save()

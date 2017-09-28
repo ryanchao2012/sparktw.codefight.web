@@ -14,6 +14,7 @@
     <meta name="author" content="SparkTW">
 
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    {# <link href="https:://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet"> #}
 
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css" />
@@ -28,7 +29,7 @@
 
     {% block extend-style %}{% endblock extend-style %}
 </head>
-<body>
+<body {% block body-property %}{% endblock body-property %}>
     <div class="container-fluid container-fullwidth">
         <div class="row">
             {# <div class="col-md-12"> #}
@@ -71,7 +72,7 @@
                                     <span class="glyphicon glyphicon-info-sign"></span>&emsp;&emsp;{{ user.contestant.nickname }}<strong class="caret"></strong></a>
                                     <ul class="dropdown-menu"  style="text-align: center; min-width: 50px;">
                                         <li>
-                                            <a href="#"><span class="glyphicon glyphicon-user"></span>&emsp;Profile</a>
+                                            <a href="{% url "profile_update" slug=request.user.contestant.slug %}"><span class="glyphicon glyphicon-user"></span>&emsp;Profile</a>
                                         </li>
                                         <li class="divider"/>
                                         <li>
@@ -128,6 +129,7 @@
     </div>
 
     <script src="{% static "js/jquery.min.js" %}"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
     
     <script src="{% static "js/bootstrap.min.js" %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>

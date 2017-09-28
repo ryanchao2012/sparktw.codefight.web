@@ -1,4 +1,4 @@
-import json
+# import json
 from django.contrib.auth import (
     login as auth_login,
     logout as auth_logout,
@@ -12,7 +12,9 @@ from auth.forms import (
     UserSignupForm, UserLoginForm
 )
 from combat.models import Contestant
-# from django.contrib.auth.models import User
+from .forms import ProfileForm
+from django.views.generic.edit import UpdateView
+from django.contrib import messages
 
 
 # Create your views here.
@@ -77,10 +79,30 @@ def signup(request):
 
 
 class ProfileView(DetailView):
-    template_name = 'profile.html'
+    template_name = 'profile_view.html'
     model = Contestant
     context_object_name = 'contestant'
 
-    def get_context_data(self, **kwargs):
-        context = super(ProfileView, self).get_context_data(**kwargs)
-        return context
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        if request.user == self.object.user:
+            return redirect(
+                reverse(
+                    'profile_update',
+                    kwargs={'slug': self.object.slug}
+                )
+            )
+        else:
+            return response
+
+
+class ProfileUpdate(UpdateView):
+    template_name = 'profile_update.html'
+    model = Contestant
+    form_class = ProfileForm
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if self.get_form().is_valid():
+            messages.success(request, 'Profile Updated.')
+        return response

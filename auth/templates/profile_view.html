@@ -1,0 +1,38 @@
+{% extends "profile.html" %}
+{% load i18n admin_static %}
+{% load combat_tags %}
+
+{% block profile %}
+    <h2>{{ contestant.nickname }}</h2>
+    <div class="row">
+        <a href="{{ contestant.github|default_if_none:"#" }}">
+            <h4 class="wrap">
+                <span class="label label-danger">
+                    <i class="fa fa-github" aria-hidden="true"></i>
+                    Github
+                </span>
+                
+            </h4>
+        </a>
+        &nbsp;
+        <a href="{{ contestant.linkedin|default_if_none:"#" }}">
+            <h4 class="wrap">
+                <span class="label label-info">
+                    <i class="fa fa-linkedin" aria-hidden="true"></i>
+                    Linkedin
+                </span>
+                
+            </h4>
+        </a>
+        &nbsp;
+        <a href="{{ contestant.facebook|default_if_none:"#" }}">
+            <h4 class="wrap">
+                <span class="label label-primary">
+                    <i class="fa fa-facebook" aria-hidden="true"></i>
+                    Facebook
+                </span>
+                
+            </h4>
+        </a>
+    </div>
+{% endblock profile %}

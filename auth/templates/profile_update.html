@@ -1,0 +1,44 @@
+{% extends "profile.html" %}
+{% load i18n admin_static %}
+{% load combat_tags %}
+
+{% block profile %}
+    {% if messages %} 
+        {% for message in messages %} 
+        <div class="card-inverse card-{{ message.tags }}">
+            <li style="padding: 5px 15px;"><strong>{{ message }}</strong></li>
+        </div>
+        {% endfor %} 
+    {% endif %} 
+    <form action="" method="post">
+        {% csrf_token %}
+        <h2> {{ form.nickname.errors}}{{ form.nickname }} </h2>
+
+        <span class="label label-danger">
+            <i class="fa fa-github" aria-hidden="true"></i>
+            Github
+        </span>
+        {{ form.github }}
+        
+        <span class="label label-info">
+            <i class="fa fa-linkedin" aria-hidden="true"></i>
+            Linkedin
+        </span>
+        {{ form.linkedin }}
+
+        <span class="label label-primary">
+            <i class="fa fa-facebook" aria-hidden="true"></i>
+            Facebook
+        </span>
+        {{ form.facebook }}
+        
+        <a href="#" class="btn btn-danger">變更密碼</a>
+        <input class="btn btn-primary pull-right" type="submit" value="更新">
+
+    </form>
+{% endblock %}
+
+
+{% block extend-js %}
+
+{% endblock %}
