@@ -3,18 +3,12 @@
 {% load combat_tags %}
 
 {% block profile %}
-    {% if messages %} 
-        {% for message in messages %} 
-        <div class="card-inverse card-{{ message.tags }}">
-            <li style="padding: 5px 15px;"><strong>{{ message }}</strong></li>
-        </div>
-        {% endfor %} 
-    {% endif %} 
+    
     <form action="" method="post">
         {% csrf_token %}
         <h2> {{ form.nickname.errors}}{{ form.nickname }} </h2>
 
-        <span class="label label-danger">
+        <span class="label label-default">
             <i class="fa fa-github" aria-hidden="true"></i>
             Github
         </span>
@@ -32,7 +26,8 @@
         </span>
         {{ form.facebook }}
         
-        <a href="#" class="btn btn-danger">變更密碼</a>
+
+        <a href="{% url "change_password" pk=contestant.user.id %}" class="btn btn-danger">變更密碼</a>
         <input class="btn btn-primary pull-right" type="submit" value="更新">
 
     </form>

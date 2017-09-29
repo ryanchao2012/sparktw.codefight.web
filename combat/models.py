@@ -32,7 +32,7 @@ class Contestant(models.Model):
     github = models.URLField(null=True, blank=True)
     linkedin = models.URLField(null=True, blank=True)
     facebook = models.URLField(null=True, blank=True)
-    last_update = models.DateTimeField(auto_now=True)
+    last_update = models.DateTimeField(default=timezone.now)
     created = models.BooleanField(default=False)
     submits = models.IntegerField(default=0)
     elapsed = models.DurationField(default=datetime.timedelta, blank=True, null=True)

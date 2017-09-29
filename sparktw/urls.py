@@ -17,7 +17,7 @@ from django.conf.urls import url
 from django.contrib import admin
 from combat import views as combat_views
 from auth import views as auth_views
-
+# from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
     url(r'^yeee/', admin.site.urls),
@@ -30,5 +30,7 @@ urlpatterns = [
     url(r'^accounts/signup/$', auth_views.signup, name='signup'),
     url(r'^accounts/profile/(?P<slug>[-\w]+)/$', auth_views.ProfileView.as_view(), name='profile_view'),
     url(r'^accounts/update/(?P<slug>[-\w]+)/$', auth_views.ProfileUpdate.as_view(), name='profile_update'),
+    url(r'^accounts/password/(?P<pk>\d+)/$', auth_views.PasswordChangeView.as_view(), name='change_password'),
+
 
 ]

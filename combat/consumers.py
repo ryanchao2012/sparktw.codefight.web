@@ -120,6 +120,7 @@ class EvaluateConsumer(WebsocketConsumer):
                         snippet.contestant.sparko += snippet.quiz.reward
                         snippet.contestant.elapsed += ans.elapsed
                         snippet.contestant.submits += ans.submits
+                        snippet.contestant.last_update = timezone.now()
                     ans.save()
                 snippet.contestant.save()
                 snippet.quiz.save()
