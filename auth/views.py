@@ -137,6 +137,22 @@ class PasswordChangeView(UpdateView):
             return response
 
 
+def get_renking(this):
+    aheads = Contestant.objects.filter(
+        user__is_staff=False,
+        sparko__gte=this.sparko
+    )
+
+    same_scores = aheads.filter(sparko=this.sparko).order_by('last_update', 'submits', 'elapsed')
+    _ranking = 0
+    for c in same_scores:
+        if c.id == this.id:
+            break
+        _ranking += 1
+
+    return 1 + len(aheads) - len(same_scores) + _ranking
+
+
 class ProfileView(DetailView):
     template_name = 'profile_view.html'
     model = Contestant
@@ -145,18 +161,7 @@ class ProfileView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(ProfileView, self).get_context_data(**kwargs)
 
-        aheads = Contestant.objects.filter(
-            sparko__gte=self.object.sparko
-        )
-
-        same_scores = aheads.filter(sparko=self.object.sparko).order_by('last_update', 'submits', 'elapsed')
-        _ranking = 0
-        for c in same_scores:
-            if c.id == self.object.id:
-                break
-            _ranking += 1
-
-        context['ranking'] = 1 + len(aheads) - len(same_scores) + _ranking
+        context['ranking'] = get_renking(self.object)
         return context
 
     def get(self, request, *args, **kwargs):
@@ -181,19 +186,7 @@ class ProfileUpdate(UpdateView):
     def get_context_data(self, **kwargs):
         context = super(ProfileUpdate, self).get_context_data(**kwargs)
 
-        aheads = Contestant.objects.filter(
-            user__is_staff=False,
-            sparko__gte=self.object.sparko
-        )
-
-        same_scores = aheads.filter(sparko=self.object.sparko).order_by('last_update', 'submits', 'elapsed')
-        _ranking = 0
-        for c in same_scores:
-            if c.id == self.object.id:
-                break
-            _ranking += 1
-
-        context['ranking'] = 1 + len(aheads) - len(same_scores) + _ranking
+        context['ranking'] = get_renking(self.object)
         return context
 
     def get(self, request, *args, **kwargs):
