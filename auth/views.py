@@ -182,6 +182,7 @@ class ProfileUpdate(UpdateView):
         context = super(ProfileUpdate, self).get_context_data(**kwargs)
 
         aheads = Contestant.objects.filter(
+            user__is_staff=False,
             sparko__gte=self.object.sparko
         )
 
