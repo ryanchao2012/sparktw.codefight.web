@@ -29,17 +29,17 @@ class QuizAdmin(admin.ModelAdmin):
 
 
 class SnippetAdmin(admin.ModelAdmin):
-    list_display = ('contestant', 'quiz', 'language', 'status', 'last_run', 'is_running')
+    list_display = ('contestant', 'quiz', 'language', 'created', 'last_run', 'run_count', 'is_running')
     list_filter = ('language', 'status')
     list_editable = ('is_running',)
-    search_fields = ['contestant__nickname', 'uid']
+    search_fields = ['contestant__nickname', 'uid', 'quiz__title']
     # readonly_fields = ('script',)
 
 
 class AnswerAdmin(admin.ModelAdmin):
-    list_display = ('contestant', 'quiz', 'language', 'created', 'last_update')
+    list_display = ('contestant', 'quiz', 'language', 'elapsed', 'created', 'last_update')
     list_filter = ('language',)
-    search_fields = ['contestant__nickname']
+    search_fields = ['contestant__nickname', 'quiz__title']
 
 admin.site.register(Contestant, ContestantAdmin)
 admin.site.register(Quiz, QuizAdmin)
