@@ -8,19 +8,25 @@
 {% endblock extend-style %}
 {% block main-content %}
 <div>
-    <form class="form-sign" id="formSignup" action="{% url "signup" %}?next={{ next }}" method="post">
-        {% csrf_token %}
-        <h2>Sign up
-        <input class="btn btn-primary pull-right" type="submit" id="btnSignup">
-        </h2>
-        <hr>
-        {% for field in form %}
-            {% for error in field.errors %}
-                <div class="errorlist">* {{ error }}</div>
-            {% endfor %}
-            {{ field }}<br>
-        {% endfor %}
-    </form>
+
+    {# <form class="form-sign" id="formSignup" action="{% url "signup" %}?next={{ next }}" method="post"> #}
+        {# {% csrf_token %} #}
+        {# <h2>Sign up #}
+            <div style="background-color: red; color: #fff; padding: 10px;">
+                <h2>
+                    註冊功能已關閉，謝謝大家。
+                </h2>
+            </div>
+        {# <input class="btn btn-primary pull-right" type="submit" id="btnSignup"> #}
+        {# </h2> #}
+        {# <hr> #}
+        {# {% for field in form %} #}
+            {# {% for error in field.errors %} #}
+                {# <div class="errorlist">* {{ error }}</div> #}
+            {# {% endfor %} #}
+            {# {{ field }}<br> #}
+        {# {% endfor %} #}
+    {# </form> #}
 </div>
 
 {% endblock %}
