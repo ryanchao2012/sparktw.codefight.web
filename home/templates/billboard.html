@@ -1,0 +1,51 @@
+{% extends "index.html" %}
+{% load i18n admin_static %}
+
+{% block main-content %}
+        
+<div class="row">
+    <div class="col-md-12">
+        <div id="message-block">
+            {% if not anndata %}
+                <h1>No announcements.</h1>                
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock main-content %}
+
+{% block extend-js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datejs/1.0/date.min.js"></script>
+    <script type="text/javascript">
+        var md = window.markdownit();
+        var $block = $('#message-block');
+        // var anndata = [];
+        {% for ann in anndata %}
+            var ann = JSON.parse("{{ ann|escapejs }}");
+            var $jumbotron = $(document.createElement('div'));
+            var $markdown = $(document.createElement('div'));
+            var $date = $(document.createElement('div'));
+            var $title = $(document.createElement('div'));
+            var created = new Date(ann.created * 1000);
+            var modified = new Date(ann.modified * 1000);
+            $date.addClass('pull-right');
+            $jumbotron.addClass('jumbotron');
+            $date.html('<span class="label label-default">' + '發佈時間:&nbsp;' +  created.toString('yyyy MMM dd - hh : mm') + '</span> <span class="label label-success">' + '更新時間:&nbsp;' +  modified.toString('yyyy MMM dd - hh : mm') + '</span>');
+
+            $title.html('<h2>' + ann.title + '<small><strong> by ' + ann.manager + '</strong></small></h2>')
+
+            $markdown.html(md.render(ann.body));
+            $jumbotron.append($date);
+            $jumbotron.append($title);
+            $jumbotron.append($markdown);
+
+            $block.append($jumbotron);
+
+        {% endfor %}
+        
+    </script>
+    
+{% endblock extend-js %}
+
+
+

@@ -4,7 +4,7 @@ import requests
 import time
 import json
 import logging
-
+from django.utils import timezone
 from configparser import RawConfigParser
 config_parser = RawConfigParser()
 configfile = config_parser.read('sparktw.config.ini')
@@ -35,6 +35,15 @@ class QuizData(MyDict):
     status = ''
     difficulty = ''
     reward = 0
+
+
+class AnnounceData(MyDict):
+    title = ''
+    body = ''
+    manager = ''
+    created = timezone.now().timestamp()
+    modified = timezone.now().timestamp()
+    status = ''
 
 
 class SnippetData(MyDict):

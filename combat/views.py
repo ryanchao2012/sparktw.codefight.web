@@ -46,7 +46,6 @@ def challenges(request):
 
 def leaderboard(request):
     contestants = Contestant.objects \
-        .filter(sparko__gte=0) \
         .order_by('-sparko', 'last_update', 'submits', 'elapsed')
 
     if not request.user.is_staff:

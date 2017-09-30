@@ -56,7 +56,7 @@ class ProfileForm(forms.ModelForm):
         widgets = {
             'nickname': forms.TextInput(
                 attrs={
-                    'style': 'width: 295px;',
+                    'style': 'width: 100%;',
                 }
             ),
             'github': forms.URLInput(
@@ -216,6 +216,7 @@ class UserLoginForm(forms.Form):
             "fields may be case-sensitive."
         ),
         'inactive': _("This account is inactive."),
+        'bang': "您的帳號已被禁用，請聯絡網站管理員"
     }
 
     def clean(self):
@@ -225,6 +226,8 @@ class UserLoginForm(forms.Form):
         if email and raw_password:
             try:
                 user = User.objects.get(email=email)
+                if not user.is_active:
+                    raise forms.ValidationError(self.error_messages['bang'])
                 auth_user = authenticate(username=user.username, password=raw_password)
                 if not auth_user:
                     raise forms.ValidationError(self.error_messages['invalid_login'])
@@ -232,8 +235,8 @@ class UserLoginForm(forms.Form):
                     self.cleaned_data['username'] = user.username
             except User.DoesNotExist:
                 raise forms.ValidationError(self.error_messages['invalid_login'])
-            except Exception as err:
-                logger.warning(err)
-                raise forms.ValidationError(self.error_messages['invalid_login'])
+            # except Exception as err:
+            #     logger.warning(err)
+            #     raise forms.ValidationError(self.error_messages['invalid_login'])
 
         return self.cleaned_data

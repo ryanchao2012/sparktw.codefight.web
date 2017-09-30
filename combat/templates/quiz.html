@@ -43,7 +43,7 @@
                 &nbsp;
                 <span id="elapsed_timer" class="label label-default label-as-badge"></span>
                 
-                <h1>{{ quizdata.title|pretty_title }}</h1>
+                <h1><span id="id_ispass" class="label label-success"></span>&nbsp;{{ quizdata.title|pretty_title }}</h1>
             </div>
 
             <div class="tabbable">
@@ -86,7 +86,6 @@
 {% endblock main-content %}
 
 {% block extend-js %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/8.3.1/markdown-it.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.7/ace.js"></script>
     <script type="text/javascript" src="{% static "channels/js/websocketbridge.js" %}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/datejs/1.0/date.min.js"></script>
@@ -99,6 +98,7 @@
 
         var md = window.markdownit();
         var quizdata = JSON.parse("{{ quizdata|escapejs }}");
+        console.log("{{ quizdata|escapejs }}");
         var snippetdata = JSON.parse("{{ snippetdata|escapejs }}");
         var currdata = JSON.parse("{{ current|escapejs }}");
 
@@ -113,10 +113,13 @@
 
         var update_elapsed = function() {
             var lang = $languagepicker.val();
+            var $pass_block = $('#id_ispass');
             $elapsed_timer.empty();
+            $pass_block.empty();
             if(snippetdata[lang].is_submit) {
                 if(snippetdata[lang].is_pass) {
                     $elapsed_timer.text(format_elapsed(snippetdata[lang].elapsed));
+                    $('#id_ispass').html('pass');
                 } else {
                     $elapsed_timer.text(format_elapsed($.now()/1000 - snippetdata[lang].created));
                 }

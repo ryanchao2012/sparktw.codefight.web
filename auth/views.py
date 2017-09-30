@@ -137,7 +137,7 @@ class PasswordChangeView(UpdateView):
             return response
 
 
-def get_renking(this):
+def get_ranking(this):
     aheads = Contestant.objects.filter(
         user__is_staff=False,
         sparko__gte=this.sparko
@@ -161,7 +161,7 @@ class ProfileView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(ProfileView, self).get_context_data(**kwargs)
 
-        context['ranking'] = get_renking(self.object)
+        context['ranking'] = get_ranking(self.object)
         return context
 
     def get(self, request, *args, **kwargs):
@@ -186,12 +186,12 @@ class ProfileUpdate(UpdateView):
     def get_context_data(self, **kwargs):
         context = super(ProfileUpdate, self).get_context_data(**kwargs)
 
-        context['ranking'] = get_renking(self.object)
+        context['ranking'] = get_ranking(self.object)
         return context
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
-        if request.user != self.object.user:
+        if not (request.user.is_authenticated()) or request.user != self.object.user:
             # return HttpResponseForbidden()
             return redirect(
                 reverse(
@@ -203,7 +203,10 @@ class ProfileUpdate(UpdateView):
             return response
 
     def post(self, request, *args, **kwargs):
-        response = super().post(request, *args, **kwargs)
-        if self.get_form().is_valid():
-            messages.success(request, 'Profile Updated.')
-        return response
+        if request.user.is_authenticated():
+            response = super().post(request, *args, **kwargs)
+            if self.get_form().is_valid():
+                messages.success(request, 'Profile Updated.')
+            return response
+        else:
+            return HttpResponseForbidden()

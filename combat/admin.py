@@ -18,21 +18,28 @@ class ExtendUserAdmin(UserAdmin):
 
 class ContestantAdmin(admin.ModelAdmin):
     list_display = ('nickname', 'valid_name')
+    search_fields = ['nickname', 'uid']
 
 
 class QuizAdmin(admin.ModelAdmin):
     list_display = ('title', 'difficulty', 'status',)
     list_editable = ('status',)
     readonly_fields = ('slug',)
+    search_fields = ['title', 'uid']
 
 
 class SnippetAdmin(admin.ModelAdmin):
-    list_display = ('contestant', 'quiz', 'language', 'status', 'last_run')
+    list_display = ('contestant', 'quiz', 'language', 'status', 'last_run', 'is_running')
+    list_filter = ('language', 'status')
+    list_editable = ('is_running',)
+    search_fields = ['contestant__nickname', 'uid']
     # readonly_fields = ('script',)
 
 
 class AnswerAdmin(admin.ModelAdmin):
     list_display = ('contestant', 'quiz', 'language', 'created', 'last_update')
+    list_filter = ('language',)
+    search_fields = ['contestant__nickname']
 
 admin.site.register(Contestant, ContestantAdmin)
 admin.site.register(Quiz, QuizAdmin)

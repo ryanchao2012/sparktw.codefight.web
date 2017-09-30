@@ -17,12 +17,14 @@ from django.conf.urls import url
 from django.contrib import admin
 from combat import views as combat_views
 from auth import views as auth_views
+from home import views as home_views
 # from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
     url(r'^yeee/', admin.site.urls),
     url(r'^$', auth_views.home, name='home'),
     url(r'^challenges/$', combat_views.challenges, name='challenges'),
+    url(r'^billboard/$', home_views.billboard, name='billboard'),
     url(r'^leaderboard/$', combat_views.leaderboard, name='leaderboard'),
     url(r'^q/(?P<slug>[-\w]+)/$', combat_views.QuizView.as_view(), name='quiz'),
     url(r'^accounts/login/$', auth_views.login, name='login'),

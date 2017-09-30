@@ -112,7 +112,7 @@ class EvaluateConsumer(WebsocketConsumer):
                         ans.body = snippet.body
                         ans.script = default_storage.save(path, ContentFile(snippet.body))
                     if created:
-                        snippet.quiz.passes += 1
+                        snippet.quiz.passes += 1  # TODO: concurrent issue
                         ans.elapsed = timezone.now() - snippet.created
                         ans.submits = snippet.run_count
 
