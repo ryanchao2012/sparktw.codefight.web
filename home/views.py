@@ -17,7 +17,8 @@ def billboard(request):
                 body=ann.body,
                 manager=ann.manager.username,
                 created=ann.created.timestamp(),
-                modified=ann.modified.timestamp()
+                modified=ann.modified.timestamp(),
+                is_draft=(ann.status != 'published')
             )
         )
 

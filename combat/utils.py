@@ -43,7 +43,7 @@ class AnnounceData(MyDict):
     manager = ''
     created = timezone.now().timestamp()
     modified = timezone.now().timestamp()
-    status = ''
+    is_draft = True
 
 
 class SnippetData(MyDict):

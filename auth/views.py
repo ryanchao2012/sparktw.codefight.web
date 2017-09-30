@@ -18,6 +18,7 @@ from combat.models import Contestant
 from .forms import ProfileForm, PasswordForm
 from django.views.generic.edit import UpdateView
 from django.contrib import messages
+from combat.utils import QuizData
 # from django.contrib.auth.forms import PasswordChangeForm
 
 
@@ -160,8 +161,9 @@ class ProfileView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(ProfileView, self).get_context_data(**kwargs)
-
+        # passed_quiz = list({ans.quiz for ans in self.object.answer_set.all()})
         context['ranking'] = get_ranking(self.object)
+        # context['quiz'] =
         return context
 
     def get(self, request, *args, **kwargs):
