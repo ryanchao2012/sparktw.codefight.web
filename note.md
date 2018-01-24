@@ -1,3 +1,5 @@
+./manage.py runworker --only-channels='websocket.*' --threads 10
+daphne -u /home/ubuntu/apps/sparktw/conf/daphne.sock sparktw.asgi:channel_layer
 
 #Every Page
 menu:
